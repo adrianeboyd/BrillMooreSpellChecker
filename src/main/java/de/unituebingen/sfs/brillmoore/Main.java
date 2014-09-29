@@ -1,8 +1,5 @@
 package de.unituebingen.sfs.brillmoore;
 
-import gnu.getopt.Getopt;
-import gnu.getopt.LongOpt;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
