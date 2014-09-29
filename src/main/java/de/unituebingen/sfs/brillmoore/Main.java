@@ -27,6 +27,7 @@ public class Main
 		String trainFile = null;
 		String dictFile = null;
 		String testFile = null;
+		int window = 0;
 
 		// create the command line parser
 		CommandLineParser parser = new BasicParser();
@@ -37,6 +38,7 @@ public class Main
 		options.addOption("p", "train", true, "training file");
 		options.addOption("d", "dict", true, "dictionary file");
 		options.addOption("t", "test", true, "testing file");
+		options.addOption("w", "window", true, "window (Brill and Moore's N");
 		options.addOption("h", "help", false, "print usage");
 
 		try {
@@ -50,18 +52,21 @@ public class Main
 			trainFile = line.getOptionValue('p');
 			dictFile = line.getOptionValue('d');
 			testFile = line.getOptionValue('t');
+			window = Integer.parseInt(line.getOptionValue('w'));
 		} catch (org.apache.commons.cli.ParseException e) {
 			System.out.println(e.getMessage());
 			printHelp(options);
 		}
 
+		// read in files
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
 		Map<String, DictEntry> dict = readDict(dictFile);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
-		int window = 3;
 		
+		// train spell checker
 		SpellChecker spellchecker = new SpellChecker(trainMisspellings, dict, window);
 		
+		// call spell checker for each misspelling in test file
 		for (Misspelling t : testMisspellings) {
 			List<String> outList = new ArrayList<String>();
 			outList.add(t.getSource());
@@ -71,7 +76,6 @@ public class Main
 			List<Candidate> candidates = spellchecker.getRankedCandidates(t.getSource());
 
 			for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), 10))) {
-				//System.out.print(cand.getTarget() + " " + cand.getProb());
 				outList.add(cand.getTarget());
 				outList.add(cand.getProb().toString());
 			}
@@ -132,7 +136,7 @@ public class Main
 	
 	/**
 	 * Read in word list from from file, one word per line,
-	 * tab-separated: word, probability (not yet implemented)
+	 * tab-separated: word, probability/count (not yet implemented)
 	 * 
 	 * @param file word list file
 	 * @return
@@ -160,8 +164,12 @@ public class Main
 		return dict;
 	}
 	
+	/**
+	 * Print automatically-generated help and exit.
+	 * 
+	 * @param options
+	 */
 	private static void printHelp(Options options) {
-		// automatically generate the help statement
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("brillmoore", options);
 		System.exit(0);
