@@ -13,6 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
 
 public class Main 
@@ -23,56 +28,31 @@ public class Main
 		String dictFile = null;
 		String testFile = null;
 
-		int c;
-		String arg;
-		LongOpt[] longopts = new LongOpt[2];
+		// create the command line parser
+		CommandLineParser parser = new BasicParser();
 
-		StringBuffer sb = new StringBuffer();
-		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
-		longopts[1] = new LongOpt("train", LongOpt.REQUIRED_ARGUMENT, sb, 'p');
-		longopts[1] = new LongOpt("dict", LongOpt.REQUIRED_ARGUMENT, sb, 'd');
-		longopts[1] = new LongOpt("test", LongOpt.REQUIRED_ARGUMENT, sb, 't');
+		// create the Options
+		Options options = new Options();
 
-		Getopt g = new Getopt("brillmoore", argv, "p:d:t:h", longopts);
+		options.addOption("p", "train", true, "training file");
+		options.addOption("d", "dict", true, "dictionary file");
+		options.addOption("t", "test", true, "testing file");
+		options.addOption("h", "help", false, "print usage");
 
-		while ((c = g.getopt()) != -1) {
-			switch (c) {
-			case 'h':
-				printHelp();
-				break;
-
-			case 'p':
-				arg = g.getOptarg();
-				trainFile = (arg != null) ? arg: null;
-				break;
-
-			case 'd':
-				arg = g.getOptarg();
-				dictFile = (arg != null) ? arg: null;
-				break;
-
-			case 't':
-				arg = g.getOptarg();
-				testFile = (arg != null) ? arg: null;
-				break;
-
-			case ':':
-				System.out.println("Provide an argument for option " +
-						(char) g.getOptopt());
-				break;
-			case '?':
-				System.out.println("The option '" + (char)g.getOptopt() + 
-						"' is not valid");
-				break;
-			default:
-				System.out.println("getopt() returned " + c);
-				break;
+		try {
+			// parse the command line arguments
+			CommandLine line = parser.parse(options, argv);
+			
+			if (line.hasOption("help")) {
+				printHelp(options);
 			}
-		}
-		
-		if (trainFile == null || dictFile == null || testFile == null) {
-			printHelp();
-			System.exit(0);
+
+			trainFile = line.getOptionValue('p');
+			dictFile = line.getOptionValue('d');
+			testFile = line.getOptionValue('t');
+		} catch (org.apache.commons.cli.ParseException e) {
+			System.out.println(e.getMessage());
+			printHelp(options);
 		}
 
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
@@ -180,7 +160,10 @@ public class Main
 		return dict;
 	}
 	
-	private static void printHelp() {
-		System.out.println("Here is no help.");
+	private static void printHelp(Options options) {
+		// automatically generate the help statement
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("brillmoore", options);
+		System.exit(0);
 	}
 }
