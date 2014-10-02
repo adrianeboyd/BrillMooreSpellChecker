@@ -50,15 +50,6 @@ public class ErrorModel {
 
 			alignmentProbs.put(a.getKey(), prob);
 		}
-
-		// default probabilities for padding characters
-		alignmentProbs.put(new Alignment(AlignmentUtils.leftPadding, AlignmentUtils.leftPadding), 1.0);
-		alignmentProbs.put(new Alignment(AlignmentUtils.rightPadding, AlignmentUtils.rightPadding), 1.0);
-		//alignmentProbs.put(new Alignment(AlignmentUtils.nullString, AlignmentUtils.leftPadding), 1.0);
-		//alignmentProbs.put(new Alignment(AlignmentUtils.nullString, AlignmentUtils.rightPadding), 1.0);
-		alignmentProbs.put(new Alignment(AlignmentUtils.nullString, AlignmentUtils.nullString), 1.0);
-		alignmentProbs.put(new Alignment(AlignmentUtils.rightPadding, AlignmentUtils.nullString), 1.0);
-		alignmentProbs.put(new Alignment(AlignmentUtils.nullString, AlignmentUtils.leftPadding), 1.0);
 	}
 	
 	public Map<Alignment, Double> getModel() {

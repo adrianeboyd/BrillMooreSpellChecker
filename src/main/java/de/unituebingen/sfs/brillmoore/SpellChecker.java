@@ -19,6 +19,7 @@ public class SpellChecker
 	private Map<Alignment, Double> alphaBetaMap;
 	private Map<String, DictEntry> dictList;
 	private int window;
+	private final int paddingLength = 2;
 
 	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window) {
 		this.dictList = dictList;
@@ -36,7 +37,7 @@ public class SpellChecker
 			String target = m.getTarget();
 			int count = m.getCount();
 			List<Alignment> alignments = la.getAlignments(target, source);
-			List<Alignment> expandedAlignments = AlignmentUtils.extendAlignments(alignments,  window);
+			List<Alignment> expandedAlignments = AlignmentUtils.extendAlignments(alignments, window);
 			
 			for (Alignment a : expandedAlignments) {
 				Integer prevCount = alignmentCounts.get(a);
@@ -48,7 +49,7 @@ public class SpellChecker
 				alignmentCounts.put(a, prevCount + count);
 			}
 		}
-		
+
 		// generate an error model from the alignment counts, with a default
 		// minimum probabilty for alpha -> alpha (m from my thesis, p. 24)
 		ErrorModel e = new ErrorModel(alignmentCounts, 0.8);
@@ -89,7 +90,7 @@ public class SpellChecker
 		return candidates;
 	}
 
-	public void editDistCalc(final String m, final String prefix, final Trie<List<Double>>.Node node) {
+	private void editDistCalc(final String m, final String prefix, final Trie<List<Double>>.Node node) {
 
 		// at root initialize first row of edit distance table
 		if (node.getParent() == null) {
@@ -101,7 +102,7 @@ public class SpellChecker
 			}
 		}
 		
-		// initialize value of this node if neceesary
+		// initialize value of this node if necessary
 		if (node.getValue() == null) {
 			node.setValue(new ArrayList<Double>());
 			while (node.getValue().size() < m.length()) {
@@ -118,13 +119,13 @@ public class SpellChecker
 			double e, e1, e2;
 
 			node.getValue().set(i, Double.POSITIVE_INFINITY);
-						
-			for (int j = tstr.length(); j >= 0 && j > tstr.length() - window; j--) {
+
+			for (int j = tstr.length(); j >= 0 && j >= tstr.length() - window - 1; j--) {
 					
 				Trie<List<Double>>.Node pnode = node;
 				String t2 = splitString(tstr, j);
 				
-				for (int k = sstr.length(); k >= 0 && k > sstr.length() - window; k--) {
+				for (int k = sstr.length(); k >= 0 && k >= sstr.length() - window - 1; k--) {
 				
 					String s2 =  splitString(sstr, k);
 
@@ -198,7 +199,6 @@ public class SpellChecker
 		Trie<List<Double>> dictTrie = new Trie<List<Double>>();
 
 		for (DictEntry w : dict.values()) {
-			//System.out.println(padWord(w, window));
 			dictTrie.put(padWord(w.getWord(), window), new ArrayList<Double>());
 		}
 		
@@ -206,10 +206,8 @@ public class SpellChecker
 	}
 
 	private String padWord(String word, int window) {
-		for (int i = 0; i < window; i++) {
-			word = AlignmentUtils.leftPadding + word + AlignmentUtils.rightPadding;
-		}
-		
+		word = AlignmentUtils.nullString + AlignmentUtils.leftPadding + word + AlignmentUtils.rightPadding + AlignmentUtils.nullString;
+
 		return word;
 	}
 	
@@ -221,7 +219,6 @@ public class SpellChecker
 		if (a.rhs.length() == 0) {
 			a.rhs = AlignmentUtils.nullString;
 		}
-		//System.out.print("Getting probability for: " + a + " ");
 		
 		if (alphaBetaMap.containsKey(a)) {
 			return -Math.log(alphaBetaMap.get(a));
@@ -285,7 +282,7 @@ public class SpellChecker
 			Double prob = p.getValue().get(p.getValue().size() - 1);
 			
 			// TODO: incorporate dictionary probability as P(w) below
-			c.add(new Candidate(candidate.substring(window, candidate.length() - window), prob));
+			c.add(new Candidate(candidate.substring(paddingLength, candidate.length() - paddingLength), prob));
 		}
 		
 		Collections.sort(c);

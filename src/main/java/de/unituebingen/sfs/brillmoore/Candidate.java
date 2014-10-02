@@ -24,4 +24,9 @@ public class Candidate implements Comparable<Candidate> {
 	public int compareTo(Candidate c) {
 		return prob.compareTo(c.prob);
     }
+
+	@Override
+	public String toString() {
+		return "Candidate [target=" + target + ", prob=" + prob + "]";
+	}
 }

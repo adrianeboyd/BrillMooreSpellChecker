@@ -41,18 +41,29 @@ public class AlignmentUtils {
 	/* window is Brill and Moore's M */
 	public static List<Alignment> extendAlignments(List<Alignment> alignments, int window) {
 		List<Alignment> combined = new ArrayList<Alignment>();
-		for (int i = 0; i < window; i++) {
-			alignments.add(0, new Alignment(leftPadding, leftPadding));
-			alignments.add(new Alignment(rightPadding, rightPadding));
-		}
 		
-		for (int i = window; i < alignments.size() - window; i++) {
+		// pad alignments with padding strings for left and right context
+		alignments.add(0, new Alignment(leftPadding, leftPadding));
+		alignments.add(new Alignment(rightPadding, rightPadding));
+		
+		// pad alignments with null string
+		alignments.add(0, new Alignment(nullString, nullString));
+		alignments.add(new Alignment(nullString, nullString));
+		
+		for (int i = 0; i < alignments.size(); i++) {
 			for (int j = 0; j <= window; j++) {
 				int left = i - j;
 				int right = i + j + 1;
+
+				if (left >= 0 && i + 1 <= alignments.size()) {
+					combined.add(combineAlignments(alignments.subList(left, i + 1)));
+				}
 				
-				combined.add(combineAlignments(alignments.subList(left, i + 1)));
-				combined.add(combineAlignments(alignments.subList(i, right)));
+				if (left != i && i + 1 != right) {
+					if (i >= 0 && right <= alignments.size()) {
+						combined.add(combineAlignments(alignments.subList(i, right)));
+					}
+				}
 			}
 		}
 		
