@@ -100,8 +100,7 @@ public class SpellChecker
 			
 			for (int i = 0; i < m.length(); i++) {
 				String sstr = m.substring(0, i);
-				//node.getValue().set(i, getProb(new Alignment(AlignmentUtils.nullString, sstr)));
-				node.getValue().set(i, getProb(new Alignment(sstr, AlignmentUtils.nullString)));
+				node.getValue().set(i, getProb(new Alignment(AlignmentUtils.nullString, sstr)));
 			}
 		}
 		
@@ -113,8 +112,7 @@ public class SpellChecker
 			}
 		}
 		
-		//node.getValue().set(0, getProb(new Alignment(prefix, AlignmentUtils.nullString)));
-		node.getValue().set(0, getProb(new Alignment(AlignmentUtils.nullString, prefix)));
+		node.getValue().set(0, getProb(new Alignment(prefix, AlignmentUtils.nullString)));
 
 		for (int i = 1; i < m.length(); i++) {
 			String sstr = prefix;
@@ -138,9 +136,7 @@ public class SpellChecker
 						e1 = pnode.getValue().get(j);
 						pnode = pnode.getParent();
 					}
-					//e2 = getProb(new Alignment(s2, t2));
-					e2 = getProb(new Alignment(t2, s2));
-					System.out.println(new Alignment(t2, s2) + " " + e2);
+					e2 = getProb(new Alignment(s2, t2));
 					e = e1 + e2;
 					if (e < lowest) {
 						lowest = e;
