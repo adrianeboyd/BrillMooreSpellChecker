@@ -19,10 +19,12 @@ public class SpellChecker
 	private Map<Alignment, Double> alphaBetaMap;
 	private Map<String, DictEntry> dictList;
 	private int window;
+	private double minAtoA;
 
-	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window) {
+	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window, double minAtoA) {
 		this.dictList = dictList;
 		this.window = window;
+		this.minAtoA = minAtoA;
 		trainSpellChecker(misspellings);
 	}
 	
@@ -49,9 +51,13 @@ public class SpellChecker
 			}
 		}
 		
+		System.out.println(alignmentCounts);
+		
 		// generate an error model from the alignment counts, with a default
 		// minimum probabilty for alpha -> alpha (m from my thesis, p. 24)
-		ErrorModel e = new ErrorModel(alignmentCounts, 0.8);
+		ErrorModel e = new ErrorModel(alignmentCounts, minAtoA);
+		
+		System.out.println(e);
 		
 		// create the alpha/beta trie with reversed strings
 		//makeAlphaBetaTrie(e);
@@ -97,11 +103,12 @@ public class SpellChecker
 			
 			for (int i = 0; i < m.length(); i++) {
 				String sstr = m.substring(0, i);
-				node.getValue().set(i, getProb(new Alignment(AlignmentUtils.nullString, sstr)));
+				//node.getValue().set(i, getProb(new Alignment(AlignmentUtils.nullString, sstr)));
+				node.getValue().set(i, getProb(new Alignment(sstr, AlignmentUtils.nullString)));
 			}
 		}
 		
-		// initialize value of this node if neceesary
+		// initialize value of this node if necessary
 		if (node.getValue() == null) {
 			node.setValue(new ArrayList<Double>());
 			while (node.getValue().size() < m.length()) {
@@ -109,7 +116,8 @@ public class SpellChecker
 			}
 		}
 		
-		node.getValue().set(0, getProb(new Alignment(prefix, AlignmentUtils.nullString)));
+		//node.getValue().set(0, getProb(new Alignment(prefix, AlignmentUtils.nullString)));
+		node.getValue().set(0, getProb(new Alignment(AlignmentUtils.nullString, prefix)));
 
 		for (int i = 1; i < m.length(); i++) {
 			String sstr = prefix;
@@ -119,12 +127,12 @@ public class SpellChecker
 
 			node.getValue().set(i, Double.POSITIVE_INFINITY);
 						
-			for (int j = tstr.length(); j >= 0 && j > tstr.length() - window; j--) {
+			for (int j = tstr.length(); j >= 0 /* && j > tstr.length() - window */; j--) {
 					
 				Trie<List<Double>>.Node pnode = node;
 				String t2 = splitString(tstr, j);
 				
-				for (int k = sstr.length(); k >= 0 && k > sstr.length() - window; k--) {
+				for (int k = sstr.length(); k >= 0 /* && k > sstr.length() - window */; k--) {
 				
 					String s2 =  splitString(sstr, k);
 
@@ -134,7 +142,9 @@ public class SpellChecker
 						e1 = pnode.getValue().get(j);
 						pnode = pnode.getParent();
 					}
-					e2 = getProb(new Alignment(s2, t2));
+					//e2 = getProb(new Alignment(s2, t2));
+					e2 = getProb(new Alignment(t2, s2));
+					System.out.println(new Alignment(t2, s2) + " " + e2);
 					e = e1 + e2;
 					if (e < lowest) {
 						lowest = e;
