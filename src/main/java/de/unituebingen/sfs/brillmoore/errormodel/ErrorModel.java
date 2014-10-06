@@ -56,7 +56,11 @@ public class ErrorModel {
 	}
 	
 	public double getProb(Alignment a) {
-		return alignmentProbs.get(a);
+		if (alignmentProbs.containsKey(a)) {
+			return alignmentProbs.get(a);
+		}
+		
+		return 0.0;
 	}
 	
 	public String toString() {
