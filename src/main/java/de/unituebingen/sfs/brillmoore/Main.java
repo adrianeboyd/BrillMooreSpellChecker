@@ -24,7 +24,9 @@ public class Main
 		String trainFile = null;
 		String dictFile = null;
 		String testFile = null;
-		int window = 0;
+		int window = 3;
+		double minAtoA = 0.8;
+		int numCand = 10;
 
 		// create the command line parser
 		CommandLineParser parser = new BasicParser();
@@ -35,8 +37,10 @@ public class Main
 		options.addOption("p", "train", true, "training file");
 		options.addOption("d", "dict", true, "dictionary file");
 		options.addOption("t", "test", true, "testing file");
-		options.addOption("w", "window", true, "window (Brill and Moore's N");
-		options.addOption("h", "help", false, "print usage");
+		options.addOption("w", "window", true, "window for expanding alignments (Brill and Moore's N; default 3)");
+		options.addOption("a", "minatoa", true, "minimum a -> a probability (default 0.8)");
+		options.addOption("c", "candidates", false, "number of candidates to output (default 10)");
+		options.addOption("h", "help", false, "this help message");
 
 		try {
 			// parse the command line arguments
@@ -49,9 +53,51 @@ public class Main
 			trainFile = line.getOptionValue('p');
 			dictFile = line.getOptionValue('d');
 			testFile = line.getOptionValue('t');
-			window = Integer.parseInt(line.getOptionValue('w'));
+			if (line.hasOption('w')) {
+				try {
+					window = Integer.parseInt(line.getOptionValue('w'));
+				} catch (NumberFormatException e) {
+					System.out.println("The window (-w) option was not formatted as an integer.");
+					printHelp(options);
+				}
+			}
+			
+			if (line.hasOption('a')) {
+				try {
+					minAtoA = Double.parseDouble(line.getOptionValue('a'));
+				} catch (NumberFormatException e) {
+					System.out.println("The alignment (-a) option was not formatted as a float.");
+					printHelp(options);
+				}
+			}
+			
+			if (line.hasOption('c')) {
+				try {
+					numCand = Integer.parseInt(line.getOptionValue('c'));
+
+				} catch (NumberFormatException e) {
+					System.out.println("The candidate (-c) option was not formatted as an integer.");
+					printHelp(options);
+				}
+			}
 		} catch (org.apache.commons.cli.ParseException e) {
 			System.out.println(e.getMessage());
+			printHelp(options);
+		}
+		
+		// check that parameters are within sensible ranges
+		if (window < 0) {
+			System.out.println("The window (-w) for expanding alignments must be 0 or greater.");
+			printHelp(options);
+		}
+		
+		if (minAtoA < 0 || minAtoA > 1) {
+			System.out.println("The minimum a -> a probability (-a) must be between 0 and 1.");
+			printHelp(options);
+		}
+		
+		if (numCand <= 0) {
+			System.out.println("The number of candidates (-c) to output must be greater than 0.");
 			printHelp(options);
 		}
 
@@ -61,7 +107,7 @@ public class Main
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
 		
 		// train spell checker
-		SpellChecker spellchecker = new SpellChecker(trainMisspellings, dict, window);
+		SpellChecker spellchecker = new SpellChecker(trainMisspellings, dict, window, minAtoA);
 		
 		// call spell checker for each misspelling in test file
 		for (Misspelling t : testMisspellings) {
@@ -72,7 +118,7 @@ public class Main
 			
 			List<Candidate> candidates = spellchecker.getRankedCandidates(t.getSource());
 
-			for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), 10))) {
+			for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), numCand))) {
 				outList.add(cand.getTarget());
 				outList.add(cand.getProb().toString());
 			}
