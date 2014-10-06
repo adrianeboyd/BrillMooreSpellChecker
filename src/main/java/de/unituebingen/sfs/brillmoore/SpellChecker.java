@@ -75,7 +75,7 @@ public class SpellChecker
 		return editDist(misspelling);
 	}
 	
-	public List<Candidate> editDist(final String m) {
+	private List<Candidate> editDist(final String m) {
 		// create a new dictionary trie for each calculation
 		Trie<List<Double>> dictTrie = makeDictTrie(dictList);
 		
