@@ -138,9 +138,8 @@ public class SpellChecker
 					}
 					e2 = getProb(new Alignment(s2, t2));
 					e = e1 + e2;
-					if (e < lowest) {
-						lowest = e;
-					}
+					
+					lowest = Math.min(e, lowest);
 				}
 			}
 
