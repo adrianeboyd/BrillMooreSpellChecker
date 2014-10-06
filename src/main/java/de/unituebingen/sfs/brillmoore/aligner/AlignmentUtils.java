@@ -38,30 +38,44 @@ public class AlignmentUtils {
 		return new Alignment(clhs.toString(), crhs.toString());
 	}
 
-	/* window is Brill and Moore's M */
+	/**
+	 * Extends alignments with left and right context within window after 
+	 * padding the alignments with the special null and left/right context
+	 * alignments.
+	 * 
+	 * @param alignments alignments to extend
+	 * @param window Brill and Moore's M
+	 * @return
+	 */
 	public static List<Alignment> extendAlignments(List<Alignment> alignments, int window) {
+		List<Alignment> padded = new ArrayList<Alignment>();
 		List<Alignment> combined = new ArrayList<Alignment>();
 		
-		// pad alignments with padding strings for left and right context
-		alignments.add(0, new Alignment(leftPadding, leftPadding));
-		alignments.add(new Alignment(rightPadding, rightPadding));
+		// add alignments to padded alignment list
+		for (Alignment a : alignments) {
+			padded.add(a);
+		}
 		
-		// pad alignments with null string
-		alignments.add(0, new Alignment(nullString, nullString));
-		alignments.add(new Alignment(nullString, nullString));
+		// pad padded with padding strings for left and right context
+		padded.add(0, new Alignment(leftPadding, leftPadding));
+		padded.add(new Alignment(rightPadding, rightPadding));
 		
-		for (int i = 0; i < alignments.size(); i++) {
+		// pad padded with null string
+		padded.add(0, new Alignment(nullString, nullString));
+		padded.add(new Alignment(nullString, nullString));
+		
+		for (int i = 0; i < padded.size(); i++) {
 			for (int j = 0; j <= window; j++) {
 				int left = i - j;
 				int right = i + j + 1;
 
-				if (left >= 0 && i + 1 <= alignments.size()) {
-					combined.add(combineAlignments(alignments.subList(left, i + 1)));
+				if (left >= 0 && i + 1 <= padded.size()) {
+					combined.add(combineAlignments(padded.subList(left, i + 1)));
 				}
 				
 				if (left != i && i + 1 != right) {
-					if (i >= 0 && right <= alignments.size()) {
-						combined.add(combineAlignments(alignments.subList(i, right)));
+					if (i >= 0 && right <= padded.size()) {
+						combined.add(combineAlignments(padded.subList(i, right)));
 					}
 				}
 			}
