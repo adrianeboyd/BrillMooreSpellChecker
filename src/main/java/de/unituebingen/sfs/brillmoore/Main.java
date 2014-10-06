@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Main 
 {
+	private static Options options;
 
 	public static void main(String[] argv) {
 		String trainFile = null;
@@ -32,7 +33,7 @@ public class Main
 		CommandLineParser parser = new BasicParser();
 
 		// create the Options
-		Options options = new Options();
+		options = new Options();
 
 		options.addOption("p", "train", true, "training file");
 		options.addOption("d", "dict", true, "dictionary file");
@@ -47,7 +48,7 @@ public class Main
 			CommandLine line = parser.parse(options, argv);
 			
 			if (line.hasOption("help")) {
-				printHelp(options);
+				printHelp();
 			}
 
 			trainFile = line.getOptionValue('p');
@@ -58,7 +59,7 @@ public class Main
 					window = Integer.parseInt(line.getOptionValue('w'));
 				} catch (NumberFormatException e) {
 					System.out.println("The window (-w) option was not formatted as an integer.");
-					printHelp(options);
+					printHelp();
 				}
 			}
 			
@@ -67,7 +68,7 @@ public class Main
 					minAtoA = Double.parseDouble(line.getOptionValue('a'));
 				} catch (NumberFormatException e) {
 					System.out.println("The alignment (-a) option was not formatted as a float.");
-					printHelp(options);
+					printHelp();
 				}
 			}
 			
@@ -77,28 +78,49 @@ public class Main
 
 				} catch (NumberFormatException e) {
 					System.out.println("The candidate (-c) option was not formatted as an integer.");
-					printHelp(options);
+					printHelp();
 				}
 			}
 		} catch (org.apache.commons.cli.ParseException e) {
 			System.out.println(e.getMessage());
-			printHelp(options);
+			printHelp();
 		}
 		
+		// check that file parameters are given
+		boolean stopAtHelp = false;
+		
+		if (trainFile == null) {
+			System.out.println("Please specify a training file (-p).");
+			stopAtHelp = true;
+		}
+		if (dictFile == null) {
+			System.out.println("Please specify a dictionary file (-d).");
+			stopAtHelp = true;
+		}
+		if (testFile == null) {
+			System.out.println("Please specify a testing file (-t).");
+			stopAtHelp = true;
+		}
+
 		// check that parameters are within sensible ranges
 		if (window < 0) {
 			System.out.println("The window (-w) for expanding alignments must be 0 or greater.");
-			printHelp(options);
+			stopAtHelp = true;
 		}
 		
 		if (minAtoA < 0 || minAtoA > 1) {
 			System.out.println("The minimum a -> a probability (-a) must be between 0 and 1.");
-			printHelp(options);
+			stopAtHelp = true;
 		}
 		
 		if (numCand <= 0) {
 			System.out.println("The number of candidates (-c) to output must be greater than 0.");
-			printHelp(options);
+			stopAtHelp = true;
+		}
+		
+		if (stopAtHelp) {
+			System.out.println();
+			printHelp();
 		}
 
 		// read in files
@@ -167,11 +189,15 @@ public class Main
 			
 			input.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.err.println(file + " could not be opened.");
+			System.exit(-1);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(file + " could not be read.");
+			System.exit(-1);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			System.err.println(file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
+					"misspelling TAB target TAB count");
+			System.exit(-1);
 		}
 		
 		return misspellings;
@@ -192,16 +218,34 @@ public class Main
 		try {
 			input = new BufferedReader(new FileReader(file));
 			String line;
+			int lineCount = 1;
 
 			while ((line = input.readLine()) != null) {
-				dict.put(line.trim(), new DictEntry(line.trim(), 1.0));
+
+				String[] lineParts = line.split("\t");
+				String word = null;
+				double freq = 0;
+
+				if (lineParts.length < 2) {
+					input.close();
+					throw new ParseException(line, lineCount);
+				} else {
+					word = lineParts[0];
+					freq = Double.parseDouble(lineParts[1]);
+				}
+				dict.put(word, new DictEntry(word, freq));
+				lineCount++;
 			}
 			
 			input.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.err.println(file + " could not be opened.");
+			printHelp();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(file + " could not be read.");
+		} catch (ParseException e) {
+			System.err.println(file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
+					"word TAB frequency");
 		}
 		
 		return dict;
@@ -212,7 +256,7 @@ public class Main
 	 * 
 	 * @param options
 	 */
-	private static void printHelp(Options options) {
+	private static void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("brillmoore", options);
 		System.exit(0);
