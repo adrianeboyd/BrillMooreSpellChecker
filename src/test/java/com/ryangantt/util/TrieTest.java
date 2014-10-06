@@ -8,7 +8,7 @@ public class TrieTest {
   private Trie<Integer> trie;
   
   @BeforeMethod
-  public void setupTest() {
+  public void beforeMethod() {
     trie = new Trie<Integer>();
   }
   
