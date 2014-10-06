@@ -78,11 +78,36 @@ public class LevenshteinAligner {
 
 	/**
 	 * Compute the Levenshtein distance between the specified source
-	 * string and the specified target string.
+	 * string and the specified target string return a list of EditOp edits.
+	 * 
+	 * @param source source string
+	 * @param target target string
+	 * @return list of EditOp edits
 	 */
 	public List<String> getEdits(String source, String target) {	
 		int[][] table = new int[source.length()][target.length()];
 		String[][] backtrace = new String[source.length()][target.length()];
+		
+		// special cases if the source or target string is empty
+		if (source.length() == 0 && target.length() == 0) {
+			return new ArrayList<String>();
+		} else if (source.length() == 0) {
+			List<String> edits = new ArrayList<String>();
+			
+			for (int i = 0; i < target.length(); i++) {
+				edits.add(EditOps.insert);
+			}
+			
+			return edits;
+		} else if (target.length() == 0) {
+			List<String> edits = new ArrayList<String>();
+			
+			for (int i = 0; i < source.length(); i++) {
+				edits.add(EditOps.delete);
+			}
+			
+			return edits;
+		}
 		
 		if (source.charAt(0) != target.charAt(0)) {
 			table[0][0] = Math.min(replaceCost, deleteCost + insertCost);
@@ -159,10 +184,18 @@ public class LevenshteinAligner {
 		
 		Collections.reverse(reverseEdits);
 		return reverseEdits; // not reversed here!
-	
-		//return table[source.length() - 1][target.length() - 1];
 	}
 	
+	/**
+	 * Get the list of alignments between the source and target string, 
+	 * derived from the list of edits from getEdits().  The left-hand side
+	 * and right-side side of each alignment are either an empty string 
+	 * or a single character.
+	 * 
+	 * @param source
+	 * @param target
+	 * @return list of alignments
+	 */
 	public List<Alignment> getAlignments(String source, String target) {
 		List<String> edits = getEdits(source, target);
 		List<Alignment> alignments = new ArrayList<Alignment>();
@@ -187,9 +220,18 @@ public class LevenshteinAligner {
 		return alignments;
 	}
 	
+	/**
+	 * Get the edit distance between the source and target strings.
+	 * 
+	 * @param source
+	 * @param target
+	 * @return edit distance
+	 */
 	public int getDistance(String source, String target) {
 		List<String> edits = getEdits(source, target);
 		int dist = 0;
+		
+		// edit distance is all non-match alignments
 		for (String edit : edits) {
 			if (edit != EditOps.match) {
 				dist++;
@@ -198,8 +240,4 @@ public class LevenshteinAligner {
 		
 		return dist;
 	}
-	
-	/* public List<Alignment> getAlignments {
-		
-	}*/
 }
