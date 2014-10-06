@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.unituebingen.sfs.brillmoore.aligner.Alignment;
-import de.unituebingen.sfs.brillmoore.aligner.AlignmentUtils;
 
 public class ErrorModel {
 
