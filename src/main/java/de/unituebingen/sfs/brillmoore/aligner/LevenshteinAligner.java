@@ -51,6 +51,13 @@ import java.util.List;
  */
 public class LevenshteinAligner {
 	private final int deleteCost, insertCost, replaceCost;
+	
+	public class EditOps {
+		public final static String delete = "DEL";
+		public final static String insert = "INS";
+		public final static String match = "MAT";
+		public final static String sub = "SUB";
+	}
 
 	/**
 	 * Constructor.
