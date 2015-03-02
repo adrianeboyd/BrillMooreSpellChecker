@@ -1,0 +1,6 @@
+Abeit	Arbeit	2
+Abril	April	1
+Addresse	Adresse	1
+Alkahol	Alkohol	1
+Alstadt	Altstadt	1
+Artz	Arzt	1

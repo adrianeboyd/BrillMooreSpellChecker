@@ -1,0 +1,6 @@
+Arbeit	.1
+April	.2
+Adresse	.3
+Altstadt	.1
+Alkohol	.1
+Arzt	.2
