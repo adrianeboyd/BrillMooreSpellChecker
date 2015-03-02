@@ -1,0 +1,65 @@
+Compiling and Running
+---------------------
+
+Compile:
+
+$ mvn package
+
+
+Run:
+
+$ java -jar target/brillmoore-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+
+
+Usage:
+
+ -a,--minatoa <arg>   minimum a -> a probability (default 0.8)
+ -c,--candidates      number of candidates to output (default 10)
+ -d,--dict <arg>      dictionary file
+ -h,--help            this help message
+ -p,--train <arg>     training file
+ -t,--test <arg>      testing file
+ -w,--window <arg>    window for expanding alignments (Brill and Moore's
+                      N; default 3)
+
+
+Sample Usage
+------------
+
+Sample input files are provided in data/:
+
+$ java -jar target/brillmoore-0.0.1-SNAPSHOT-jar-with-dependencies.jar -a 0.7 \ 
+  -c 5 -d data/sample-dict.txt -p data/sample-train.txt \ 
+  -t data/sample-test.txt -w 2
+
+
+Input Formats
+-------------
+
+Training/Testing:
+
+- counts are optional, assumed to be 1 if no count provided
+- the test counts are merely copied into the output for further use
+
+misspelling TAB target TAB count
+
+
+Dictionary:
+
+- without probabilities (one word per line, all words equally likely):
+
+word
+
+- with probabilities:
+
+word TAB probability
+
+
+Output
+------
+
+The output echoes the test input columns (misspelling, target, count) and 
+appends the ranked candidate corrections as pairs of columns containing 
+the candidate correction and the -log(prob) of the candidate.
+
+misspelling TAB target TAB count TAB candidate1 TAB -log(prob1) TAB candidate2 TAB -log(prob2) ...
