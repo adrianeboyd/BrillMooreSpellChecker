@@ -87,39 +87,32 @@ public class Main
 		}
 		
 		// check that file parameters are given
-		boolean stopAtHelp = false;
-		
 		if (trainFile == null) {
 			System.out.println("Please specify a training file (-p).");
-			stopAtHelp = true;
+			printHelp();
 		}
 		if (dictFile == null) {
 			System.out.println("Please specify a dictionary file (-d).");
-			stopAtHelp = true;
+			printHelp();
 		}
 		if (testFile == null) {
 			System.out.println("Please specify a testing file (-t).");
-			stopAtHelp = true;
+			printHelp();
 		}
 
 		// check that parameters are within sensible ranges
 		if (window < 0) {
 			System.out.println("The window (-w) for expanding alignments must be 0 or greater.");
-			stopAtHelp = true;
+			printHelp();
 		}
 		
 		if (minAtoA < 0 || minAtoA > 1) {
 			System.out.println("The minimum a -> a probability (-a) must be between 0 and 1.");
-			stopAtHelp = true;
+			printHelp();
 		}
 		
 		if (numCand <= 0) {
 			System.out.println("The number of candidates (-c) to output must be greater than 0.");
-			stopAtHelp = true;
-		}
-		
-		if (stopAtHelp) {
-			System.out.println();
 			printHelp();
 		}
 
@@ -169,7 +162,7 @@ public class Main
 				String[] lineParts = line.split("\t");
 				String source = null;
 				String target = null;
-				int count = 0;
+				int count = 1;
 				
 				if (lineParts.length < 2) {
 					input.close();
@@ -189,13 +182,13 @@ public class Main
 			
 			input.close();
 		} catch (FileNotFoundException e) {
-			System.err.println(file + " could not be opened.");
+			System.err.println("The file " + file + " could not be opened.");
 			System.exit(-1);
 		} catch (IOException e) {
-			System.err.println(file + " could not be read.");
+			System.err.println("The file " + file + " could not be read.");
 			System.exit(-1);
 		} catch (ParseException e) {
-			System.err.println(file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
+			System.err.println("The file " + file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
 					"misspelling TAB target TAB count");
 			System.exit(-1);
 		}
@@ -214,7 +207,6 @@ public class Main
 		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
 		BufferedReader input;
 		
-		// TODO: add frequencies or probabilities to dict file
 		try {
 			input = new BufferedReader(new FileReader(file));
 			String line;
@@ -226,26 +218,31 @@ public class Main
 				String word = null;
 				double freq = 0;
 
-				if (lineParts.length < 2) {
+				if (lineParts.length >= 1) {
+					word = lineParts[0];
+					freq = 1.0;
+				} else if (lineParts.length == 2) {
+					freq = Double.parseDouble(lineParts[1]);
+				} else {
 					input.close();
 					throw new ParseException(line, lineCount);
-				} else {
-					word = lineParts[0];
-					freq = Double.parseDouble(lineParts[1]);
 				}
+				
 				dict.put(word, new DictEntry(word, freq));
 				lineCount++;
 			}
 			
 			input.close();
 		} catch (FileNotFoundException e) {
-			System.err.println(file + " could not be opened.");
+			System.err.println("The file " + file + " could not be opened.");
 			printHelp();
 		} catch (IOException e) {
-			System.err.println(file + " could not be read.");
+			System.err.println("The file " + file + " could not be read.");
+			printHelp();
 		} catch (ParseException e) {
-			System.err.println(file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
-					"word TAB frequency");
+			System.err.println("The file " + file + " could not be parsed at line " + e.getErrorOffset() + ".  The format is: \n" +
+					"word TAB probability");
+			printHelp();
 		}
 		
 		return dict;

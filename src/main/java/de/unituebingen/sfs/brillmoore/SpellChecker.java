@@ -53,7 +53,7 @@ public class SpellChecker
 		}
 
 		// generate an error model from the alignment counts, with a default
-		// minimum probabilty for alpha -> alpha (m from my thesis, p. 24)
+		// minimum probability for alpha -> alpha (m from Boyd (2008), p. 24)
 		ErrorModel e = new ErrorModel(alignmentCounts, minAtoA);
 		
 		// create the alpha/beta trie with reversed strings
@@ -64,7 +64,6 @@ public class SpellChecker
 
 		// create dict trie (not thread-safe)
 		//makeDictTrie(dict);
-
 	}
 	
 	public List<Candidate> getRankedCandidates(final String m) {
@@ -229,16 +228,14 @@ public class SpellChecker
 		/*
 		
 		// brute-search trie version
-		
-		Double prob = 0.0;
-		
+
 		Trie<Double> betaTrie = alphaBetaTrie.get(StringUtils.reverse(a.lhs));
 		
 		if (betaTrie == null) {
 			return Double.POSITIVE_INFINITY;
 		}
 		
-		prob = betaTrie.get(StringUtils.reverse(a.rhs));
+		Double prob = betaTrie.get(StringUtils.reverse(a.rhs));
 		
 		if (prob == null) {
 			return Double.POSITIVE_INFINITY;
@@ -279,10 +276,12 @@ public class SpellChecker
 		
 		for (Map.Entry<String, List<Double>> p : v.entrySet()) {
 			String candidate = p.getKey();
+			candidate = candidate.substring(paddingLength, candidate.length() - paddingLength);
+
 			Double prob = p.getValue().get(p.getValue().size() - 1);
+			prob = prob + -Math.log(dictList.get(candidate).getProb());
 			
-			// TODO: incorporate dictionary probability as P(w) below
-			c.add(new Candidate(candidate.substring(paddingLength, candidate.length() - paddingLength), prob));
+			c.add(new Candidate(candidate, prob));
 		}
 		
 		Collections.sort(c);

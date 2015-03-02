@@ -1,8 +1,8 @@
 package de.unituebingen.sfs.brillmoore;
 
 public class DictEntry implements Comparable<DictEntry> {
-    public final String word;
-    public final Double prob;
+    private final String word;
+    private final Double prob;
 
 	public DictEntry(String word, Double prob) {
         this.word = word;
