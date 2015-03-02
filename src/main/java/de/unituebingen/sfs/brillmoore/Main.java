@@ -40,7 +40,7 @@ public class Main
 		options.addOption("t", "test", true, "testing file");
 		options.addOption("w", "window", true, "window for expanding alignments (Brill and Moore's N; default 3)");
 		options.addOption("a", "minatoa", true, "minimum a -> a probability (default 0.8)");
-		options.addOption("c", "candidates", false, "number of candidates to output (default 10)");
+		options.addOption("c", "candidates", true, "number of candidates to output (default 10)");
 		options.addOption("h", "help", false, "this help message");
 
 		try {
@@ -75,7 +75,6 @@ public class Main
 			if (line.hasOption('c')) {
 				try {
 					numCand = Integer.parseInt(line.getOptionValue('c'));
-
 				} catch (NumberFormatException e) {
 					System.out.println("The candidate (-c) option was not formatted as an integer.");
 					printHelp();
@@ -255,7 +254,7 @@ public class Main
 	 */
 	private static void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("brillmoore", options);
+		formatter.printHelp("java -jar brillmoore-0.0.1-SNAPSHOT-jar-with-dependencies.jar", options);
 		System.exit(0);
 	}
 }
