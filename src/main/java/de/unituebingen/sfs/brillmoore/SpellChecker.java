@@ -66,17 +66,21 @@ public class SpellChecker
 		//makeDictTrie(dict);
 	}
 	
-	public List<Candidate> getRankedCandidates(final String m) {
+	public List<Candidate> getRankedCandidates(final String m, Map<String, DictEntry> aDictList) {
 		// traverse the dictionary trie to calculate the edit distance between 
 		// a misspelling and all words in the dictionary
 		String misspelling = padWord(m, window);
 		
-		return editDist(misspelling);
+		return editDist(misspelling, aDictList);
 	}
 	
-	private List<Candidate> editDist(final String m) {
+	public List<Candidate> getRankedCandidates(final String m) {		
+		return getRankedCandidates(m, dictList);
+	}
+	
+	private List<Candidate> editDist(final String m, Map<String, DictEntry> aDictList) {
 		// create a new dictionary trie for each calculation
-		Trie<List<Double>> dictTrie = makeDictTrie(dictList);
+		Trie<List<Double>> dictTrie = makeDictTrie(aDictList);
 		
 		// initialize values in dictTrie for new calculation		
 		dictTrie.clearValues();
@@ -86,11 +90,11 @@ public class SpellChecker
 		}
 		
 		editDistCalc(m, "", dictTrie.getRoot());
-		List<Candidate> candidates = getRankedCandidates(dictTrie, window);
+		List<Candidate> candidates = getRankedCandidates(dictTrie, window, aDictList);
 		
 		return candidates;
 	}
-
+	
 	private void editDistCalc(final String m, final String prefix, final Trie<List<Double>>.Node node) {
 
 		// at root initialize first row of edit distance table
@@ -270,7 +274,7 @@ public class SpellChecker
 	 * @param window
 	 * @return
 	 */
-	private List<Candidate> getRankedCandidates(Trie<List<Double>> dictTrie, int window) {
+	private List<Candidate> getRankedCandidates(Trie<List<Double>> dictTrie, int window, Map<String, DictEntry> aDictList) {
 		List<Candidate> c = new ArrayList<Candidate>();
 		Map<String, List<Double>> v = dictTrie.traverse(true);
 		
@@ -279,7 +283,7 @@ public class SpellChecker
 			candidate = candidate.substring(paddingLength, candidate.length() - paddingLength);
 
 			Double prob = p.getValue().get(p.getValue().size() - 1);
-			prob = prob + -Math.log(dictList.get(candidate).getProb());
+			prob = prob + -Math.log(aDictList.get(candidate).getProb());
 			
 			c.add(new Candidate(candidate, prob));
 		}
