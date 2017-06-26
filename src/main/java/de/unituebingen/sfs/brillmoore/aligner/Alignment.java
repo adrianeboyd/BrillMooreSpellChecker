@@ -15,7 +15,7 @@ public class Alignment {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		final int prime = 92821;
 		int result = 1;
 		result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
 		result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
