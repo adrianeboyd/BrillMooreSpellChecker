@@ -44,7 +44,7 @@ public class AlignmentUtils {
 	 * alignments.
 	 * 
 	 * @param alignments alignments to extend
-	 * @param window Brill and Moore's M
+	 * @param window Brill and Moore's N
 	 * @return
 	 */
 	public static List<Alignment> extendAlignments(List<Alignment> alignments, int window) {
@@ -82,5 +82,13 @@ public class AlignmentUtils {
 		}
 		
 		return combined;
+	}
+	
+	public static String getReservedChars() {
+		return leftPadding + rightPadding + nullString;
+	}
+	
+	public static String padWord(String word) {
+		return nullString + leftPadding + word + rightPadding + nullString;
 	}
 }

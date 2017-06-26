@@ -119,25 +119,30 @@ public class Main
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
 		Map<String, DictEntry> dict = readDict(dictFile);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
-		
-		// train spell checker
-		SpellChecker spellchecker = new SpellChecker(trainMisspellings, dict, window, minAtoA);
-		
-		// call spell checker for each misspelling in test file
-		for (Misspelling t : testMisspellings) {
-			List<String> outList = new ArrayList<String>();
-			outList.add(t.getSource());
-			outList.add(t.getTarget());
-			outList.add(Integer.toString(t.getCount()));
-			
-			List<Candidate> candidates = spellchecker.getRankedCandidates(t.getSource());
 
-			for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), numCand))) {
-				outList.add(cand.getTarget());
-				outList.add(cand.getProb().toString());
+		// train spell checker
+		SpellChecker spellchecker;
+		try {
+			spellchecker = new SpellChecker(trainMisspellings, dict, window, minAtoA);
+
+			// call spell checker for each misspelling in test file
+			for (Misspelling t : testMisspellings) {
+				List<String> outList = new ArrayList<String>();
+				outList.add(t.getSource());
+				outList.add(t.getTarget());
+				outList.add(Integer.toString(t.getCount()));
+
+				List<Candidate> candidates = spellchecker.getRankedCandidates(t.getSource());
+
+				for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), numCand))) {
+					outList.add(cand.getTarget());
+					outList.add(cand.getProb().toString());
+				}
+
+				System.out.println(StringUtils.join(outList, "\t"));
 			}
-			
-			System.out.println(StringUtils.join(outList, "\t"));
+		} catch (ParseException e) {
+			System.err.println(e.getMessage());
 		}
 	}
 

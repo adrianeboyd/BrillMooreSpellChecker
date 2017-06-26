@@ -1,5 +1,6 @@
 package de.unituebingen.sfs.brillmoore;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,15 +22,36 @@ public class SpellChecker
 	private int window;
 	private double minAtoA;
 	private final int paddingLength = 2;
+	private String reservedChars = AlignmentUtils.getReservedChars();
+	private String regexReservedChars = ".*[" + reservedChars + "].*";
+	private String reservedCharsErrorMessage = "Please edit the data or modify AlignmentUtils to choose unused characters.";
 
-	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window, double minAtoA) {
+	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window, double minAtoA) throws ParseException {
 		this.dictList = dictList;
 		this.window = window;
 		this.minAtoA = minAtoA;
+		
+		// check for reserved characters in dictionary and misspellings
+		for (String dictKey : dictList.keySet()) {
+			if (dictKey.matches(regexReservedChars)) {
+				throw new ParseException("The dictionary contains the reserved characters: " + 
+						reservedChars + "\n" + reservedCharsErrorMessage, 0);
+			}
+		}
+		
+		for (Misspelling m : misspellings) {
+			if (m.getSource().matches(regexReservedChars) || 
+					m.getTarget().matches(regexReservedChars)) {
+				throw new ParseException("The training data contains the reserved characters: " + 
+						reservedChars + "\n" + reservedCharsErrorMessage, 0);
+		
+			}
+		}
+		
 		trainSpellChecker(misspellings);
 	}
 	
-	private void trainSpellChecker(List<Misspelling> misspellings) {
+	private void trainSpellChecker(List<Misspelling> misspellings) throws ParseException {
 		Map<Alignment, Integer> alignmentCounts = new HashMap<Alignment, Integer>();
 
 		LevenshteinAligner la = new LevenshteinAligner(1, 1, 1);
@@ -66,15 +88,30 @@ public class SpellChecker
 		//makeDictTrie(dict);
 	}
 	
-	public List<Candidate> getRankedCandidates(final String m, Map<String, DictEntry> aDictList) {
+	public List<Candidate> getRankedCandidates(final String m, Map<String, DictEntry> aDictList) throws ParseException {
 		// traverse the dictionary trie to calculate the edit distance between 
 		// a misspelling and all words in the dictionary
-		String misspelling = padWord(m, window);
+		
+		// check for reserved characters in the misspelling
+		if (m.matches(regexReservedChars)) {
+			throw new ParseException("The misspelling / test data contains the reserved characters: " + 
+					reservedChars + "\n" + reservedCharsErrorMessage, 0);
+		}
+		
+		// check for reserved characters in custom dictionary
+		for (String dictKey : aDictList.keySet()) {
+			if (dictKey.matches(regexReservedChars)) {
+				throw new ParseException("The dictionary contains the reserved characters: " + 
+						reservedChars + "\n" + reservedCharsErrorMessage, 0);
+			}
+		}
+	
+		String misspelling = AlignmentUtils.padWord(m);
 		
 		return editDist(misspelling, aDictList);
 	}
 	
-	public List<Candidate> getRankedCandidates(final String m) {		
+	public List<Candidate> getRankedCandidates(final String m) throws ParseException {		
 		return getRankedCandidates(m, dictList);
 	}
 	
@@ -202,18 +239,12 @@ public class SpellChecker
 		Trie<List<Double>> dictTrie = new Trie<List<Double>>();
 
 		for (DictEntry w : dict.values()) {
-			dictTrie.put(padWord(w.getWord(), window), new ArrayList<Double>());
+			dictTrie.put(AlignmentUtils.padWord(w.getWord()), new ArrayList<Double>());
 		}
 		
 		return dictTrie;
 	}
 
-	private String padWord(String word, int window) {
-		word = AlignmentUtils.nullString + AlignmentUtils.leftPadding + word + AlignmentUtils.rightPadding + AlignmentUtils.nullString;
-
-		return word;
-	}
-	
 	private double getProb(Alignment a) {
 		
 		if (a.lhs.length() == 0) {

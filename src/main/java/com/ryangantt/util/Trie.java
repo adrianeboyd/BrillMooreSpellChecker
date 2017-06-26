@@ -8,6 +8,15 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Trie class adapted from: https://gist.github.com/rgantt/5711830
+ * 
+ * Related documentation:
+ * http://code.ryangantt.com/articles/introduction-to-prefix-trees/
+ *
+ * @author Ryan Gantt 
+ * @author Adriane Boyd
+ */
 public class Trie<V> {
 	private Node root;
 
