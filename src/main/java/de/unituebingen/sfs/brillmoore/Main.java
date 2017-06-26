@@ -254,7 +254,7 @@ public class Main
 	 */
 	private static void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("java -jar brillmoore-0.0.1-SNAPSHOT-jar-with-dependencies.jar", options);
+		formatter.printHelp("java -jar brillmoore-0.1-jar-with-dependencies.jar", options);
 		System.exit(0);
 	}
 }
