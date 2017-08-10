@@ -18,7 +18,7 @@ public class SpellChecker
 {
 	//private Trie<Trie<Double>> alphaBetaTrie;
 	private Map<Alignment, Double> alphaBetaMap;
-	private Map<String, DictEntry> dictList;
+	private Map<String, Double> dict;
 	private int window;
 	private double minAtoA;
 	private final int paddingLength = 2;
@@ -26,13 +26,13 @@ public class SpellChecker
 	private String regexReservedChars = ".*[" + reservedChars + "].*";
 	private String reservedCharsErrorMessage = "Please edit the data or modify AlignmentUtils to choose unused characters.";
 
-	public SpellChecker(List<Misspelling> misspellings, Map<String, DictEntry> dictList, int window, double minAtoA) throws ParseException {
-		this.dictList = dictList;
+	public SpellChecker(List<Misspelling> misspellings, Map<String, Double> aDict, int window, double minAtoA) throws ParseException {
+		this.dict = aDict;
 		this.window = window;
 		this.minAtoA = minAtoA;
 		
 		// check for reserved characters in dictionary and misspellings
-		for (String dictKey : dictList.keySet()) {
+		for (String dictKey : aDict.keySet()) {
 			if (dictKey.matches(regexReservedChars)) {
 				throw new ParseException("The dictionary contains the reserved characters: " + 
 						reservedChars + "\n" + reservedCharsErrorMessage, 0);
@@ -88,7 +88,7 @@ public class SpellChecker
 		//makeDictTrie(dict);
 	}
 	
-	public List<Candidate> getRankedCandidates(final String m, Map<String, DictEntry> aDictList) throws ParseException {
+	public List<Candidate> getRankedCandidates(final String m, Map<String, Double> aDict) throws ParseException {
 		// traverse the dictionary trie to calculate the edit distance between 
 		// a misspelling and all words in the dictionary
 		
@@ -99,7 +99,7 @@ public class SpellChecker
 		}
 		
 		// check for reserved characters in custom dictionary
-		for (String dictKey : aDictList.keySet()) {
+		for (String dictKey : aDict.keySet()) {
 			if (dictKey.matches(regexReservedChars)) {
 				throw new ParseException("The dictionary contains the reserved characters: " + 
 						reservedChars + "\n" + reservedCharsErrorMessage, 0);
@@ -108,16 +108,16 @@ public class SpellChecker
 	
 		String misspelling = AlignmentUtils.padWord(m);
 		
-		return editDist(misspelling, aDictList);
+		return editDist(misspelling, aDict);
 	}
 	
 	public List<Candidate> getRankedCandidates(final String m) throws ParseException {		
-		return getRankedCandidates(m, dictList);
+		return getRankedCandidates(m, dict);
 	}
 	
-	private List<Candidate> editDist(final String m, Map<String, DictEntry> aDictList) {
+	private List<Candidate> editDist(final String m, Map<String, Double> aDict) {
 		// create a new dictionary trie for each calculation
-		Trie<List<Double>> dictTrie = makeDictTrie(aDictList);
+		Trie<List<Double>> dictTrie = makeDictTrie(aDict);
 		
 		// initialize values in dictTrie for new calculation		
 		dictTrie.clearValues();
@@ -127,7 +127,7 @@ public class SpellChecker
 		}
 		
 		editDistCalc(m, "", dictTrie.getRoot());
-		List<Candidate> candidates = getRankedCandidates(dictTrie, window, aDictList);
+		List<Candidate> candidates = getRankedCandidates(dictTrie, window, aDict);
 		
 		return candidates;
 	}
@@ -234,12 +234,12 @@ public class SpellChecker
 		
 	}
 	
-	private Trie<List<Double>> makeDictTrie(Map<String, DictEntry> dict) {
+	private Trie<List<Double>> makeDictTrie(Map<String, Double> dict) {
 		// create a trie for the dictionary
 		Trie<List<Double>> dictTrie = new Trie<List<Double>>();
 
-		for (DictEntry w : dict.values()) {
-			dictTrie.put(AlignmentUtils.padWord(w.getWord()), new ArrayList<Double>());
+		for (String w : dict.keySet()) {
+			dictTrie.put(AlignmentUtils.padWord(w), new ArrayList<Double>());
 		}
 		
 		return dictTrie;
@@ -305,7 +305,7 @@ public class SpellChecker
 	 * @param window
 	 * @return
 	 */
-	private List<Candidate> getRankedCandidates(Trie<List<Double>> dictTrie, int window, Map<String, DictEntry> aDictList) {
+	private List<Candidate> getRankedCandidates(Trie<List<Double>> dictTrie, int window, Map<String, Double> aDict) {
 		List<Candidate> c = new ArrayList<Candidate>();
 		Map<String, List<Double>> v = dictTrie.traverse(true);
 		
@@ -314,7 +314,7 @@ public class SpellChecker
 			candidate = candidate.substring(paddingLength, candidate.length() - paddingLength);
 
 			Double prob = p.getValue().get(p.getValue().size() - 1);
-			prob = prob + -Math.log(aDictList.get(candidate).getProb());
+			prob = prob + -Math.log(aDict.get(candidate));
 			
 			c.add(new Candidate(candidate, prob));
 		}

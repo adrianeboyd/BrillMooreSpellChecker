@@ -117,7 +117,7 @@ public class Main
 
 		// read in files
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
-		Map<String, DictEntry> dict = readDict(dictFile);
+		Map<String, Double> dict = readDict(dictFile);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
 
 		// train spell checker
@@ -202,13 +202,13 @@ public class Main
 	
 	/**
 	 * Read in word list from from file, one word per line,
-	 * tab-separated: word, probability/count (not yet implemented)
+	 * tab-separated: word, probability
 	 * 
 	 * @param file word list file
 	 * @return
 	 */
-	private static Map<String, DictEntry> readDict(String file) {
-		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
+	private static Map<String, Double> readDict(String file) {
+		Map<String, Double> dict = new HashMap<>();
 		BufferedReader input;
 		
 		try {
@@ -232,7 +232,7 @@ public class Main
 					throw new ParseException(line, lineCount);
 				}
 				
-				dict.put(word, new DictEntry(word, freq));
+				dict.put(word, freq);
 				lineCount++;
 			}
 			

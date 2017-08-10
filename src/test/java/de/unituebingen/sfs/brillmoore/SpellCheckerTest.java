@@ -21,10 +21,10 @@ public class SpellCheckerTest {
 		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
-		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
-		dict.put("April", new DictEntry("April", 1.0));
-		dict.put("Arzt", new DictEntry("Arzt", 1.0));
-		dict.put("Altstadt", new DictEntry("Altstadt", 1.0));
+		Map<String, Double> dict = new HashMap<>();
+		dict.put("April", 1.0);
+		dict.put("Arzt", 1.0);
+		dict.put("Altstadt", 1.0);
 		
 		SpellChecker spellcheckerWindow0 = new SpellChecker(trainMisspellings, dict, 0, 0.8);
 		SpellChecker spellcheckerWindow3 = new SpellChecker(trainMisspellings, dict, 3, 0.8);
@@ -44,10 +44,10 @@ public class SpellCheckerTest {
 		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
-		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
-		dict.put("A∀pril", new DictEntry("April", 1.0));
-		dict.put("Arzt", new DictEntry("Arzt", 1.0));
-		dict.put("Altstadt", new DictEntry("Altstadt", 1.0));
+		Map<String, Double> dict = new HashMap<>();
+		dict.put("A∀pril", 1.0);
+		dict.put("Arzt", 1.0);
+		dict.put("Altstadt", 1.0);
 		
 		SpellChecker spellcheckerWindow0 = new SpellChecker(trainMisspellings, dict, 0, 0.8);
 	}
@@ -58,10 +58,10 @@ public class SpellCheckerTest {
 		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
 		trainMisspellings.add(new Misspelling("A∀bril", "April", 1));
 		
-		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
-		dict.put("April", new DictEntry("April", 1.0));
-		dict.put("Arzt", new DictEntry("Arzt", 1.0));
-		dict.put("Altstadt", new DictEntry("Altstadt", 1.0));
+		Map<String, Double> dict = new HashMap<>();
+		dict.put("April", 1.0);
+		dict.put("Arzt", 1.0);
+		dict.put("Altstadt", 1.0);
 		
 		SpellChecker spellcheckerWindow0 = new SpellChecker(trainMisspellings, dict, 0, 0.8);
 	}
@@ -72,10 +72,10 @@ public class SpellCheckerTest {
 		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
-		Map<String, DictEntry> dict = new HashMap<String, DictEntry>();
-		dict.put("April", new DictEntry("April", 1.0));
-		dict.put("Arzt", new DictEntry("Arzt", 1.0));
-		dict.put("Altstadt", new DictEntry("Altstadt", 1.0));
+		Map<String, Double> dict = new HashMap<>();
+		dict.put("April", 1.0);
+		dict.put("Arzt", 1.0);
+		dict.put("Altstadt", 1.0);
 		
 		SpellChecker spellcheckerWindow0 = new SpellChecker(trainMisspellings, dict, 0, 0.8);
 		
