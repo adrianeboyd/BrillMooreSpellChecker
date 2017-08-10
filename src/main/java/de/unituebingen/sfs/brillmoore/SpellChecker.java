@@ -16,7 +16,6 @@ import de.unituebingen.sfs.brillmoore.errormodel.ErrorModel;
 
 public class SpellChecker 
 {
-	//private Trie<Trie<Double>> alphaBetaTrie;
 	private Map<Alignment, Double> alphaBetaMap;
 	private Map<String, Double> dict;
 	private int window;
@@ -77,15 +76,9 @@ public class SpellChecker
 		// generate an error model from the alignment counts, with a default
 		// minimum probability for alpha -> alpha (m from Boyd (2008), p. 24)
 		ErrorModel e = new ErrorModel(alignmentCounts, minAtoA);
-		
-		// create the alpha/beta trie with reversed strings
-		//makeAlphaBetaTrie(e);
-		
-		// create alternate alpha/beta map
-		makeAlphaBetaMap(e);
 
-		// create dict trie (not thread-safe)
-		//makeDictTrie(dict);
+		// create alpha/beta map
+		makeAlphaBetaMap(e);
 	}
 	
 	public List<Candidate> getRankedCandidates(final String m, Map<String, Double> aDict) throws ParseException {
@@ -193,32 +186,6 @@ public class SpellChecker
 			}
 		}
 	}
-	
-	/* private void makeAlphaBetaTrie (ErrorModel e) {
-
-		alphaBetaTrie = new Trie<>();
-
-		// first create the beta tries for each LHS
-		Map<String, Trie<Double>> betaTries = new HashMap<>();
-
-		for (Map.Entry<Alignment, Double> a : e.getModel().entrySet()) {
-			String lhs = a.getKey().lhs;
-			String rhs = a.getKey().rhs;
-			double prob = a.getValue();
-
-			if (!betaTries.containsKey(lhs)) {
-				betaTries.put(lhs, new Trie<Double>());
-			}
-
-			betaTries.get(lhs).put(StringUtils.reverse(rhs), prob);
-
-		}
-
-		// then create the whole alpha/beta trie
-		for (String lhs : betaTries.keySet()) {
-			alphaBetaTrie.put(StringUtils.reverse(lhs), betaTries.get(lhs));
-		}
-	}*/
 
 	private void makeAlphaBetaMap(ErrorModel e) {
 
@@ -259,24 +226,6 @@ public class SpellChecker
 		}
 		
 		return Double.POSITIVE_INFINITY;
-		
-		/*
-		
-		// brute-search trie version
-
-		Trie<Double> betaTrie = alphaBetaTrie.get(StringUtils.reverse(a.lhs));
-		
-		if (betaTrie == null) {
-			return Double.POSITIVE_INFINITY;
-		}
-		
-		Double prob = betaTrie.get(StringUtils.reverse(a.rhs));
-		
-		if (prob == null) {
-			return Double.POSITIVE_INFINITY;
-		}
-		
-		return -Math.log(prob);*/
 	}
 	
 	/**
