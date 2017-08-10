@@ -127,7 +127,7 @@ public class Main
 
 			// call spell checker for each misspelling in test file
 			for (Misspelling t : testMisspellings) {
-				List<String> outList = new ArrayList<String>();
+				List<String> outList = new ArrayList<>();
 				outList.add(t.getSource());
 				outList.add(t.getTarget());
 				outList.add(Integer.toString(t.getCount()));
@@ -153,7 +153,7 @@ public class Main
 	 * @return
 	 */
 	private static List<Misspelling> readMisspellings(String file) {
-		List<Misspelling> misspellings = new ArrayList<Misspelling>();
+		List<Misspelling> misspellings = new ArrayList<>();
 		
 		// TODO: replace with a CSV reader for robustness?
 		BufferedReader input;

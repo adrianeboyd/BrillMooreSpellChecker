@@ -18,7 +18,7 @@ public class SpellCheckerTest {
 	@Test
 	public void getRankedCandidates() throws ParseException {
 		// TODO: expand test
-		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
+		List<Misspelling> trainMisspellings = new ArrayList<>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
 		Map<String, Double> dict = new HashMap<>();
@@ -41,7 +41,7 @@ public class SpellCheckerTest {
 	@Test(expectedExceptions = ParseException.class)
 	public void getRankedCandidatesWithReservedDictionaryChars() throws ParseException {
 		// TODO: expand test
-		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
+		List<Misspelling> trainMisspellings = new ArrayList<>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
 		Map<String, Double> dict = new HashMap<>();
@@ -55,7 +55,7 @@ public class SpellCheckerTest {
 	@Test(expectedExceptions = ParseException.class)
 	public void getRankedCandidatesWithReservedTrainingChars() throws ParseException {
 		// TODO: expand test
-		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
+		List<Misspelling> trainMisspellings = new ArrayList<>();
 		trainMisspellings.add(new Misspelling("A∀bril", "April", 1));
 		
 		Map<String, Double> dict = new HashMap<>();
@@ -69,7 +69,7 @@ public class SpellCheckerTest {
 	@Test(expectedExceptions = ParseException.class)
 	public void getRankedCandidatesWithReservedTestingChars() throws ParseException {
 		// TODO: expand test
-		List<Misspelling> trainMisspellings = new ArrayList<Misspelling>();
+		List<Misspelling> trainMisspellings = new ArrayList<>();
 		trainMisspellings.add(new Misspelling("Abril", "April", 1));
 		
 		Map<String, Double> dict = new HashMap<>();

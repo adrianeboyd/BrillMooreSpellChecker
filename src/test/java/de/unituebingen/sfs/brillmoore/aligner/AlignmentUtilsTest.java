@@ -15,7 +15,7 @@ public class AlignmentUtilsTest {
 	
 	@BeforeMethod
 	public void beforeMethod() {
-		l = new ArrayList<Alignment>();
+		l = new ArrayList<>();
 		l.add(new Alignment("a", "b"));
 		l.add(new Alignment("c", "d"));
 	}

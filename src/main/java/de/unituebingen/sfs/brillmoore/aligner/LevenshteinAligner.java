@@ -92,7 +92,7 @@ public class LevenshteinAligner {
 		if (source.length() == 0 && target.length() == 0) {
 			return new ArrayList<String>();
 		} else if (source.length() == 0) {
-			List<String> edits = new ArrayList<String>();
+			List<String> edits = new ArrayList<>();
 			
 			for (int i = 0; i < target.length(); i++) {
 				edits.add(EditOps.insert);
@@ -100,7 +100,7 @@ public class LevenshteinAligner {
 			
 			return edits;
 		} else if (target.length() == 0) {
-			List<String> edits = new ArrayList<String>();
+			List<String> edits = new ArrayList<>();
 			
 			for (int i = 0; i < source.length(); i++) {
 				edits.add(EditOps.delete);
@@ -164,7 +164,7 @@ public class LevenshteinAligner {
 		}
 		
 		// backtrace through matrix
-		List<String> reverseEdits = new ArrayList<String>();
+		List<String> reverseEdits = new ArrayList<>();
 		
 		int posi = source.length() - 1;
 		int posj = target.length() - 1;
@@ -198,7 +198,7 @@ public class LevenshteinAligner {
 	 */
 	public List<Alignment> getAlignments(String source, String target) {
 		List<String> edits = getEdits(source, target);
-		List<Alignment> alignments = new ArrayList<Alignment>();
+		List<Alignment> alignments = new ArrayList<>();
 		
 		int posi = 0;
 		int posj = 0;

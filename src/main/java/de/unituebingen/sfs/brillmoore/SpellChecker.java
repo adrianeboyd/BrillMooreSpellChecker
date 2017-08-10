@@ -52,7 +52,7 @@ public class SpellChecker
 	}
 	
 	private void trainSpellChecker(List<Misspelling> misspellings) throws ParseException {
-		Map<Alignment, Integer> alignmentCounts = new HashMap<Alignment, Integer>();
+		Map<Alignment, Integer> alignmentCounts = new HashMap<>();
 
 		LevenshteinAligner la = new LevenshteinAligner(1, 1, 1);
 		
@@ -196,10 +196,10 @@ public class SpellChecker
 	
 	/* private void makeAlphaBetaTrie (ErrorModel e) {
 
-		alphaBetaTrie = new Trie<Trie<Double>>();
+		alphaBetaTrie = new Trie<>();
 
 		// first create the beta tries for each LHS
-		Map<String, Trie<Double>> betaTries = new HashMap<String, Trie<Double>>();
+		Map<String, Trie<Double>> betaTries = new HashMap<>();
 
 		for (Map.Entry<Alignment, Double> a : e.getModel().entrySet()) {
 			String lhs = a.getKey().lhs;
@@ -222,7 +222,7 @@ public class SpellChecker
 
 	private void makeAlphaBetaMap(ErrorModel e) {
 
-		alphaBetaMap = new HashMap<Alignment, Double>();
+		alphaBetaMap = new HashMap<>();
 
 		for (Map.Entry<Alignment, Double> a : e.getModel().entrySet()) {
 			final String lhs = a.getKey().lhs;
@@ -236,7 +236,7 @@ public class SpellChecker
 	
 	private Trie<List<Double>> makeDictTrie(Map<String, Double> dict) {
 		// create a trie for the dictionary
-		Trie<List<Double>> dictTrie = new Trie<List<Double>>();
+		Trie<List<Double>> dictTrie = new Trie<>();
 
 		for (String w : dict.keySet()) {
 			dictTrie.put(AlignmentUtils.padWord(w), new ArrayList<Double>());
@@ -306,7 +306,7 @@ public class SpellChecker
 	 * @return
 	 */
 	private List<Candidate> getRankedCandidates(Trie<List<Double>> dictTrie, int window, Map<String, Double> aDict) {
-		List<Candidate> c = new ArrayList<Candidate>();
+		List<Candidate> c = new ArrayList<>();
 		Map<String, List<Double>> v = dictTrie.traverse(true);
 		
 		for (Map.Entry<String, List<Double>> p : v.entrySet()) {

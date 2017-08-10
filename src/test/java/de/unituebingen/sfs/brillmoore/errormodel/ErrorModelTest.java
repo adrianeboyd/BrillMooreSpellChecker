@@ -13,7 +13,7 @@ public class ErrorModelTest {
 	
 	@Test
 	public void calculateModelAndGetProb() {
-		Map<Alignment, Integer> alignmentCounts = new HashMap<Alignment, Integer>();
+		Map<Alignment, Integer> alignmentCounts = new HashMap<>();
 		alignmentCounts.put(new Alignment("a", "b"), 1);
 		alignmentCounts.put(new Alignment("a", "a"), 9);
 		alignmentCounts.put(new Alignment("c", "d"), 2);

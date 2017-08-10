@@ -48,8 +48,8 @@ public class AlignmentUtils {
 	 * @return
 	 */
 	public static List<Alignment> extendAlignments(List<Alignment> alignments, int window) {
-		List<Alignment> padded = new ArrayList<Alignment>();
-		List<Alignment> combined = new ArrayList<Alignment>();
+		List<Alignment> padded = new ArrayList<>();
+		List<Alignment> combined = new ArrayList<>();
 		
 		// add alignments to padded alignment list
 		for (Alignment a : alignments) {

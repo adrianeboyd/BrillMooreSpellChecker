@@ -19,9 +19,9 @@ public class ErrorModel {
 	}
 	
 	private void calculateModel() {
-		alignmentProbs = new HashMap<Alignment, Double>();
+		alignmentProbs = new HashMap<>();
 		
-		Map<String, Integer> lhsCounts = new HashMap<String, Integer>();
+		Map<String, Integer> lhsCounts = new HashMap<>();
 		for (Map.Entry<Alignment, Integer> a : alignmentCounts.entrySet()) {
 			// only expand alignments where alpha != beta if length > 1
 			/*if (a.getKey().lhs.length() > 1 && a.getKey().lhs.equals(a.getKey().rhs)) {
