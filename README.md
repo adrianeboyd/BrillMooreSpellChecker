@@ -91,9 +91,7 @@ misspelling TAB target TAB count TAB candidate1 TAB -log(prob1) TAB candidate2 T
 Sample input files are provided in `data/`.
 
 ```
-$ java -jar target/brillmoore-0.1-jar-with-dependencies.jar -a 0.7 \ 
-  -c 3 -d data/sample-dict.txt -p data/sample-train.txt \ 
-  -t data/sample-test.txt -w 2
+$ java -jar target/brillmoore-0.1-jar-with-dependencies.jar -a 0.7 -c 3 -d data/sample-dict.txt -p data/sample-train.txt -t data/sample-test.txt -w 2
 ```
 
 Sample output:
