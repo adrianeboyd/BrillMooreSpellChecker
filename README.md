@@ -1,7 +1,7 @@
 Brill and Moore Noisy Channel Spelling Correction
 =================================================
 
-This is an inefficient* Java implementation of the noisy channel spelling
+This is an inefficient* Java implementation of the noisy channel spell
 checking approach presented in:
 
 Brill and Moore (2000). [An Improved Error Model for Noisy Channel Spelling
@@ -18,8 +18,13 @@ To use this spell checker you need:
 - a list of misspellings with corrections
 - a list of potential corrections (i.e., a dictionary of real words)
 
-*The &alpha; &rarr; &beta; alignment parameters are stored in a map rather than
-a trie of tries, which slows down the algorithm considerably.
+This spell checker does not know anything about sentence-initial
+capitalization, so it expects all possible forms of a word (capitalized,
+lowercase, mixed case, etc.) to appear in the list of potential corrections.
+
+*The &alpha; &rarr; &beta; alignment parameters are retrieved from a map rather
+than a trie of tries, so the spell checker is currently quite slow, especially
+for larger dictionaries. We hope to improve the efficiency in the future.
 
 Command Line Usage
 ------------------
@@ -88,21 +93,66 @@ misspelling TAB target TAB count TAB candidate1 TAB -log(prob1) TAB candidate2 T
 
 ### Example
 
-Sample input files are provided in `data/`.
+Sample input files based on the [Aspell common misspellings test
+data](http://aspell.net/test/common-all/) are provided in `data/`. See
+`data/README.md` for details.
 
 ```
-$ java -jar target/brillmoore-0.1-jar-with-dependencies.jar -a 0.7 -c 3 -d data/sample-dict.txt -p data/sample-train.txt -t data/sample-test.txt -w 2
+$ java -jar target/brillmoore-0.1-jar-with-dependencies.jar -d data/aspell-wordlist-en_USGBsGBz.70-1.txt -p data/aspell-common.train -t data/aspell-common.dev.first10 -c 3 > data/aspell-common.dev.first10.USGBsGBz.70-1.out
 ```
 
 Sample output:
 
 ```
-Abeit	Arbeit	1	Arbeit	1.2804152299663314	Adresse	Infinity	Alkohol	Infinity
-Abril	April	1	April	1.2804152299663314	Adresse	Infinity	Alkohol	Infinity
-Altstodt	Altstadt	1	Adresse	Infinity	Alkohol	InfinityAltstadt	Infinity
-Arz	Arzt	1	Arzt	1.5035587812805413	Adresse	Infinity	Alkohol	Infinity
+pumkin  pumpkin 1       pumpkin 4.38    pumpkin's       6.67    bumkin  7.32
+reorganision    reorganisation  1       reorganisation  2.88    reorganisation's        5.20    reorganisations 7.09
+gallaxies       galaxies        1       galaxies        4.01    galaxy's        13.26   galaxy  17.45
+superceeded     superseded      1       superseded      7.91    supersede       14.46   succeeded       18.34
+millenia        millennia       1       millennia       2.11    millennial      6.23    millennial's    8.52
+pseudonyn       pseudonym       1       pseudonym       4.69    pseudonym's     6.98    pseudonyms      8.87
+synonymns       synonyms        1       synonyms        6.46    synonym's       8.29    synonym 12.49
+prominant       prominent       1       predominant     1.76    prominent       2.71    preeminent      10.01
+manouver        maneuver        1       maneuver        1.93    manoeuvre       3.76    maneuver's      4.27
+obediance       obedience       1       obedience       1.98    obedience's     4.33    obeisance       10.12
 ```
 
+Evaluation for sample output:
+
+```
+$ data/eval.py data/aspell-common.dev.first10.USGBsGBz.70-1.out
+```
+
+```
+NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 3)
+--------------------------------------------------------------------
+0	10	90.0	100.0	100.0	100.0	100.0	100.0
+```
+
+Evaluation for the whole dev set output in
+`data/aspell-common.dev.USGBsGBz.70-1.out`:
+
+```
+NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 100)
+----------------------------------------------------------------------
+18	403	84.1	93.1	94.8	95.5	95.7	95.7
+```
+
+(Compare to: <http://aspell.net/test/common-all/>)
+
+Evaluation with default paramemeters training on all Aspell common misspellings
+(`data/aspell-common.all`) and testing on Aspell current test data
+(`data/aspell-current.all`), which focuses on difficult misspellings:
+
+```
+NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 100)
+----------------------------------------------------------------------
+43	504	56.3	78.4	83.7	88.8	91.2	92.1
+```
+
+(Compare to: <http://aspell.net/test/cur/>)
+
+_Note:_ some target corrections aren't found in the provided dictionary due to
+capitalization issues (e.g., `The`, `muslims`) and run-on errors (`incase`).
 
 Java Usage
 ----------
@@ -122,8 +172,8 @@ dict.put("Altstadt", 1.0);
 int window = 3;
 double minAtoA = 0.8;
 
-// train spell checker
 try {
+    // train spell checker
     SpellChecker spellchecker = new SpellChecker(trainMisspellings, dict, window, minAtoA);
 
     // run spell checker
@@ -137,6 +187,14 @@ try {
     System.err.println(e.getMessage());
 }
 
+```
+
+Output:
+
+```
+April	1.6094379124341005
+Altstadt	Infinity
+Arzt	Infinity
 ```
 
 Using Maven
