@@ -1,4 +1,4 @@
 Abeit	Arbeit
 Abril	April
-Altstodt	Altstadt
+Altstod	Altstadt
 Arz	Arzt
