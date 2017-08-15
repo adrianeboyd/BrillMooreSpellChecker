@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.cli.BasicParser;
@@ -136,7 +137,7 @@ public class Main
 
 				for (Candidate cand : candidates.subList(0, Math.min(candidates.size(), numCand))) {
 					outList.add(cand.getTarget());
-					outList.add(cand.getProb().toString());
+					outList.add(String.format(Locale.US, "%.2f", cand.getProb()));
 				}
 
 				System.out.println(StringUtils.join(outList, "\t"));
