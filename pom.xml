@@ -7,8 +7,16 @@
   <version>0.1</version>
   <packaging>jar</packaging>
 
-  <name>brillmoore</name>
-  <url>http://github.com/adrianeboyd/brillmoore</url>
+  <name>Brill and Moore Noisy Channel Spelling Correction</name>
+  <url>http://github.com/adrianeboyd/BrillMooreSpellChecker</url>
+
+  <developers>
+    <developer>
+      <id>adrianeboyd</id>
+      <name>Adriane Boyd</name>
+      <email>adriane@sfs.uni-tuebingen.de</email>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,8 +29,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
