@@ -31,7 +31,7 @@ public class Main
 		double minAtoA = 0.8;
 		int numCand = 10;
 		boolean lowercase = false;
-		boolean uppercase = false;
+		boolean capitalized = false;
 
 		// create the command line parser
 		CommandLineParser parser = new BasicParser();
@@ -61,7 +61,7 @@ public class Main
 			dictFile = line.getOptionValue('d');
 			testFile = line.getOptionValue('t');
 			lowercase = line.hasOption('l');
-			uppercase = line.hasOption('u');
+			capitalized = line.hasOption('u');
 			
 			if (line.hasOption('w')) {
 				try {
@@ -126,7 +126,7 @@ public class Main
 
 		// read in files
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
-		Map<String, Double> dict = readDict(dictFile, lowercase, uppercase);
+		Map<String, Double> dict = readDict(dictFile, lowercase, capitalized);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
 
 		// train spell checker
