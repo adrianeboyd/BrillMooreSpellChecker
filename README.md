@@ -18,18 +18,21 @@ To use this spell checker you need:
 - a list of misspellings with corrections
 - a list of potential corrections (i.e., a dictionary of real words)
 
-This spell checker does not know anything about sentence-initial
-capitalization, so it expects all possible forms of a word (capitalized,
-lowercase, mixed case, etc.) to appear in the list of potential corrections.
+The spell checker does not know anything about sentence boundaries or
+sentence-initial capitalization, so it expects all possible forms of a word
+(capitalized, lowercase, mixed case, etc.) to appear in the list of potential
+corrections. The command-line wrapper includes flags to expand a provided
+dictionary with lowercase and/or capitalized versions of all words.
 
-*The &alpha; &rarr; &beta; alignment parameters are retrieved from a map rather
-than a trie of tries, so the spell checker is currently quite slow, especially
-for larger dictionaries. We hope to improve the efficiency in the future.
+*The &alpha; &rarr; &beta; alignment parameters are retrieved from a map
+rather than a trie of tries as described in the original article, so the spell
+checker is currently quite slow, especially for larger dictionaries. We hope to
+improve the efficiency in the future.
 
 Command Line Usage
 ------------------
 
-### Compile
+### Compile and Package
 
 ```
 $ mvn package
@@ -44,14 +47,19 @@ $ java -jar target/brillmoore-0.1-jar-with-dependencies.jar
 ### Usage
 
 ```
- -a,--minatoa <arg>   minimum a -> a probability (default 0.8)
- -c,--candidates      number of candidates to output (default 10)
- -d,--dict <arg>      dictionary file
- -h,--help            this help message
- -p,--train <arg>     training file
- -t,--test <arg>      testing file
- -w,--window <arg>    window for expanding alignments (Brill and Moore's
-                      N; default 3)
+usage: java -jar brillmoore-0.1-jar-with-dependencies.jar
+ -a,--minatoa <arg>      minimum a -> a probability (default 0.8)
+ -c,--candidates <arg>   number of candidates to output (default 10)
+ -d,--dict <arg>         dictionary file
+ -h,--help               this help message
+ -l,--lowercase          expand dictionary with lowercase versions of all
+                         words
+ -p,--train <arg>        training file
+ -t,--test <arg>         testing file
+ -u,--capitalized        expand dictionary with capitalized versions of
+                         all words
+ -w,--window <arg>       window for expanding alignments (Brill and
+                         Moore's N; default 3)
 ```
 
 ### Data Formats
@@ -129,7 +137,8 @@ NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 3)
 ```
 
 Evaluation for the whole dev set output in
-`data/aspell-common.dev.USGBsGBz.70-1.out`:
+`data/aspell-common.dev.USGBsGBz.70-1.out` considering the first 100
+suggestions:
 
 ```
 NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 100)
@@ -152,7 +161,9 @@ NotFnd	Found	First	1-5	1-10	1-25	1-50	Any (Max: 100)
 (Compare to: <http://aspell.net/test/cur/>)
 
 _Note:_ some target corrections aren't found in the provided dictionary due to
-capitalization issues (e.g., `The`, `muslims`) and run-on errors (`incase`).
+capitalization (e.g., `The`, `muslims`) and run-on errors (`incase`). The flags
+`-l` and `-u` could be used to expand the base word list with lowercase and
+capitalized versions respectively.
 
 Java Usage
 ----------
@@ -189,7 +200,7 @@ try {
 
 ```
 
-Output:
+### Output
 
 ```
 April	1.6094379124341005

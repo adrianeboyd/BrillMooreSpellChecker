@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +30,8 @@ public class Main
 		int window = 3;
 		double minAtoA = 0.8;
 		int numCand = 10;
+		boolean lowercase = false;
+		boolean uppercase = false;
 
 		// create the command line parser
 		CommandLineParser parser = new BasicParser();
@@ -43,6 +46,8 @@ public class Main
 		options.addOption("a", "minatoa", true, "minimum a -> a probability (default 0.8)");
 		options.addOption("c", "candidates", true, "number of candidates to output (default 10)");
 		options.addOption("h", "help", false, "this help message");
+		options.addOption("l", "lowercase", false, "expand dictionary with lowercase versions of all words");
+		options.addOption("u", "capitalized", false, "expand dictionary with capitalized versions of all words");
 
 		try {
 			// parse the command line arguments
@@ -55,6 +60,9 @@ public class Main
 			trainFile = line.getOptionValue('p');
 			dictFile = line.getOptionValue('d');
 			testFile = line.getOptionValue('t');
+			lowercase = line.hasOption('l');
+			uppercase = line.hasOption('u');
+			
 			if (line.hasOption('w')) {
 				try {
 					window = Integer.parseInt(line.getOptionValue('w'));
@@ -118,7 +126,7 @@ public class Main
 
 		// read in files
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
-		Map<String, Double> dict = readDict(dictFile);
+		Map<String, Double> dict = readDict(dictFile, lowercase, uppercase);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
 
 		// train spell checker
@@ -208,7 +216,7 @@ public class Main
 	 * @param file word list file
 	 * @return
 	 */
-	private static Map<String, Double> readDict(String file) {
+	private static Map<String, Double> readDict(String file, boolean lowercase, boolean uppercase) {
 		Map<String, Double> dict = new HashMap<>();
 		BufferedReader input;
 		
@@ -249,7 +257,45 @@ public class Main
 					"word TAB probability");
 			printHelp();
 		}
-		
+
+		// add lowercase versions of all dictionary entries
+		if (lowercase) {
+			List<String> origDictKeys = new ArrayList<>(dict.keySet());
+			
+			// in case there are duplicate dictionary entries with differing
+			// probabilities, sort the keys to make the inserted entries
+			// deterministic
+			Collections.sort(origDictKeys);
+			
+			for (String w : origDictKeys) {
+				String lowerW = w.toLowerCase();
+				if (!lowerW.equals(w)) {
+					if (!dict.containsKey(lowerW)) {
+						dict.put(lowerW, dict.get(w));
+					}
+				}
+			}
+		}
+
+		// add capitalized versions of all dictionary entries
+		if (uppercase) {
+			List<String> origDictKeys = new ArrayList<>(dict.keySet());
+			
+			// in case there are duplicate dictionary entries with differing
+			// probabilities, sort the keys to make the inserted entries
+			// deterministic			
+			Collections.sort(origDictKeys);
+			
+			for (String w : origDictKeys) {
+				String upperW = StringUtils.capitalize(w);
+				if (!upperW.equals(w)) {
+					if (!dict.containsKey(upperW)) {
+						dict.put(upperW, dict.get(w));
+					}
+				}
+			}
+		}
+
 		return dict;
 	}
 	
