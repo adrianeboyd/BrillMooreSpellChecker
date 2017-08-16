@@ -18,11 +18,11 @@ To use this spell checker you need:
 - a list of misspellings with corrections
 - a list of potential corrections (i.e., a dictionary of real words)
 
-The spell checker does not know anything about sentence boundaries or
-sentence-initial capitalization, so it expects all possible forms of a word
-(capitalized, lowercase, mixed case, etc.) to appear in the list of potential
+The spell checker does not know anything about morphology or sentence-initial
+capitalization, so it expects all possible forms of a word (inflected,
+capitalized, lowercase, mixed case, etc.) to appear in the list of potential
 corrections. The command-line wrapper includes flags to expand a provided
-dictionary with lowercase and/or capitalized versions of all words.
+dictionary with lowercase and capitalized versions of all words.
 
 *The &alpha; &rarr; &beta; alignment parameters are retrieved from a map
 rather than a trie of tries as described in the original article, so the spell
@@ -55,6 +55,8 @@ usage: java -jar brillmoore-0.1-jar-with-dependencies.jar
  -l,--lowercase          expand dictionary with lowercase versions of all
                          words
  -p,--train <arg>        training file
+ -s,--single             add training instances for all single character
+                         edits
  -t,--test <arg>         testing file
  -u,--capitalized        expand dictionary with capitalized versions of
                          all words

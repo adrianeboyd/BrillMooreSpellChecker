@@ -6,11 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -32,6 +34,7 @@ public class Main
 		int numCand = 10;
 		boolean lowercase = false;
 		boolean capitalized = false;
+		boolean single = false;
 
 		// create the command line parser
 		CommandLineParser parser = new BasicParser();
@@ -48,6 +51,7 @@ public class Main
 		options.addOption("h", "help", false, "this help message");
 		options.addOption("l", "lowercase", false, "expand dictionary with lowercase versions of all words");
 		options.addOption("u", "capitalized", false, "expand dictionary with capitalized versions of all words");
+		options.addOption("s", "single", false, "add training instances for all single character edits");
 
 		try {
 			// parse the command line arguments
@@ -128,6 +132,34 @@ public class Main
 		List<Misspelling> trainMisspellings = readMisspellings(trainFile);
 		Map<String, Double> dict = readDict(dictFile, lowercase, capitalized);
 		List<Misspelling> testMisspellings = readMisspellings(testFile);
+		
+		// add training instances for all single character edits
+		if (single) {
+			// find all strings in input data
+			List<String> allInput = new ArrayList<>(dict.keySet());         
+			allInput.addAll(trainMisspellings.stream()
+					.map(m -> m.getSource() + m.getTarget())
+					.collect(Collectors.toList()));
+
+			// find all distinct characters in input data
+			List<String> allChars = allInput.stream()                       
+					.map(w -> w.split(""))
+					.flatMap(Arrays::stream)
+					.distinct()
+					.collect(Collectors.toList());
+
+			for (String c : allChars) {
+				trainMisspellings.add(new Misspelling(c, c, 1));
+				trainMisspellings.add(new Misspelling(c, "", 1));
+				trainMisspellings.add(new Misspelling("", c, 1));
+				for (String d : allChars) {
+					if (c.charAt(0) < d.charAt(0)) {
+						trainMisspellings.add(new Misspelling(c, d, 1));
+						trainMisspellings.add(new Misspelling(d, c, 1));
+					}
+				}
+			}
+		}
 
 		// train spell checker
 		SpellChecker spellchecker;
