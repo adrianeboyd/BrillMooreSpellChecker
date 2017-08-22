@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ryangantt.util.Trie;
 
 import de.unituebingen.sfs.brillmoore.aligner.Alignment;
@@ -16,7 +18,7 @@ import de.unituebingen.sfs.brillmoore.errormodel.ErrorModel;
 
 public class SpellChecker 
 {
-	private Map<Alignment, Double> alphaBetaMap;
+	private Trie<Trie<Double>> betaAlphaTrie;
 	private Map<String, Double> dict;
 	private int window;
 	private double minAtoA;
@@ -77,8 +79,8 @@ public class SpellChecker
 		// minimum probability for alpha -> alpha (m from Boyd (2008), p. 24)
 		ErrorModel e = new ErrorModel(alignmentCounts, minAtoA);
 
-		// create alpha/beta map
-		makeAlphaBetaMap(e);
+		// create beta/alpha trie
+		makeBetaAlphaTrie(e);
 	}
 	
 	public List<Candidate> getRankedCandidates(final String m, Map<String, Double> aDict) throws ParseException {
@@ -130,13 +132,13 @@ public class SpellChecker
 		// at root initialize first row of edit distance table
 		if (node.getParent() == null) {
 			node.getValue().set(0, 0.0);
-			
+
 			for (int i = 0; i < m.length(); i++) {
 				String sstr = m.substring(0, i);
 				node.getValue().set(i, getProb(new Alignment(AlignmentUtils.nullString, sstr)));
 			}
 		}
-		
+
 		// initialize value of this node if necessary
 		if (node.getValue() == null) {
 			node.setValue(new ArrayList<Double>());
@@ -144,24 +146,55 @@ public class SpellChecker
 				node.getValue().add(Double.POSITIVE_INFINITY);
 			}
 		}
-		
+
 		node.getValue().set(0, getProb(new Alignment(prefix, AlignmentUtils.nullString)));
 
 		for (int i = 1; i < m.length(); i++) {
 			String sstr = prefix;
 			String tstr = m.substring(0, i);
+
 			double lowest = Double.POSITIVE_INFINITY;
 			double e, e1, e2;
 
-			node.getValue().set(i, Double.POSITIVE_INFINITY);
+			// get the beta trie node corresponding to the last character
+			// in the target string
+			Trie<Trie<Double>>.Node betaTrieNode = betaAlphaTrie
+					.getNode(tstr.length() == 0 ? AlignmentUtils.nullString : tstr.substring(tstr.length() - 1));
 
 			for (int j = tstr.length(); j >= 0 && j >= tstr.length() - window - 1; j--) {
 				Trie<List<Double>>.Node pnode = node;
-				String t2 = splitString(tstr, j);
-				
-				for (int k = sstr.length(); k >= 0 && k >= sstr.length() - window - 1; k--) {
 
-					String s2 =  splitString(sstr, k);
+				Trie<Trie<Double>>.Node relevantBetaTrieNode = betaTrieNode;
+
+				// in the first iteration the target (beta) substring
+				// is empty, so replace the beta trie node with the one
+				// for the empty string
+				if (betaAlphaTrie != null && j == tstr.length()) {
+					relevantBetaTrieNode = betaAlphaTrie.getNode(AlignmentUtils.nullString);
+				}
+
+				// get the alpha trie node corresponding to the last 
+				// character in the source string
+				Trie<Double> alphaTrie = null;
+				Trie<Double>.Node alphaTrieNode = null;
+
+				if (relevantBetaTrieNode != null) {
+					alphaTrie = relevantBetaTrieNode.getValue();
+					if (alphaTrie != null) {
+						alphaTrieNode = alphaTrie.getNode(
+								sstr.length() == 0 ? AlignmentUtils.nullString : sstr.substring(sstr.length() - 1));
+					}
+				}
+
+				for (int k = sstr.length(); k >= 0 && k >= sstr.length() - window - 1; k--) {
+					Trie<Double>.Node relevantAlphaTrieNode = alphaTrieNode;
+
+					// in the first iteration the source (alpha) substring 
+					// is empty, so replace the alpha trie node with the one 
+					// for the empty string
+					if (alphaTrie != null && k == sstr.length()) {
+						relevantAlphaTrieNode = alphaTrie.getNode(AlignmentUtils.nullString);
+					}
 
 					if (pnode == null) {
 						e1 = node.getValue().get(j);
@@ -169,10 +202,34 @@ public class SpellChecker
 						e1 = pnode.getValue().get(j);
 						pnode = pnode.getParent();
 					}
-					e2 = getProb(new Alignment(s2, t2));
+
+					e2 = getProb(relevantAlphaTrieNode);
+
 					e = e1 + e2;
-					
+
 					lowest = Math.min(e, lowest);
+
+					// for the first iteration, alphaTrieNode is replaced with
+					// the alpha trie node for the null string, so only move down 
+					// the alpha trie starting at the second iteration
+					if (k < sstr.length()) {
+						if (alphaTrieNode != null && k > 0) {
+							alphaTrieNode = alphaTrieNode.findChild(String.valueOf(sstr.charAt(k - 1)));
+						} else {
+							alphaTrieNode = null;
+						}
+					}
+				}
+
+				// for the first iteration, betaTrieNode is replaced with
+				// the beta trie node for the null string, so only move down 
+				// the beta trie starting at the second iteration
+				if (j < tstr.length()) {
+					if (betaTrieNode != null && j > 0) {
+						betaTrieNode = betaTrieNode.findChild(String.valueOf(tstr.charAt(j - 1)));
+					} else {
+						betaTrieNode = null;
+					}
 				}
 			}
 
@@ -187,20 +244,6 @@ public class SpellChecker
 		}
 	}
 
-	private void makeAlphaBetaMap(ErrorModel e) {
-
-		alphaBetaMap = new HashMap<>();
-
-		for (Map.Entry<Alignment, Double> a : e.getModel().entrySet()) {
-			final String lhs = a.getKey().lhs;
-			final String rhs = a.getKey().rhs;
-			final double prob = a.getValue();
-			
-			alphaBetaMap.put(new Alignment(lhs, rhs), prob);
-		}
-		
-	}
-	
 	private Trie<List<Double>> makeDictTrie(Map<String, Double> dict) {
 		// create a trie for the dictionary
 		Trie<List<Double>> dictTrie = new Trie<>();
@@ -212,40 +255,75 @@ public class SpellChecker
 		return dictTrie;
 	}
 
+	/**
+	 * Do a full lookup in the beta-alpha trie for the probability of an
+	 * alignment, returning infinity if the alignment is not found.
+	 * 
+	 * @param a
+	 * @return
+	 */
 	private double getProb(Alignment a) {
-		
 		if (a.lhs.length() == 0) {
 			a.lhs = AlignmentUtils.nullString;
 		}
 		if (a.rhs.length() == 0) {
 			a.rhs = AlignmentUtils.nullString;
 		}
-		
-		if (alphaBetaMap.containsKey(a)) {
-			return -Math.log(alphaBetaMap.get(a));
+
+		Trie<Double> alphaTrie = betaAlphaTrie.get(StringUtils.reverse(a.rhs));
+
+		if (alphaTrie != null) {
+			Double prob = alphaTrie.get(StringUtils.reverse(a.lhs));
+			if (prob != null) {
+				return prob;
+			}
 		}
-		
+
 		return Double.POSITIVE_INFINITY;
 	}
-	
+
 	/**
-	 * Split string into two parts at the provided split position,
-	 * replacing empty parts with the special null string.
+	 * Find the probability at a given trie node, returning infinity if the node
+	 * or node value does not exist in the trie.
 	 * 
-	 * @param word
-	 * @param splitPos
+	 * @param node
 	 * @return
 	 */
-	private String splitString(String word, int splitPos) {
-		String s = word.substring(splitPos);
-
-		if (s.length() == 0) {
-			s = AlignmentUtils.nullString;
+	private Double getProb(Trie<Double>.Node node) {
+		if (node != null) {
+			if (node.getValue() != null) {
+				return node.getValue();
+			}
 		}
-		
-		return s;
+
+		return Double.POSITIVE_INFINITY;
 	}
-	
+
+	private void makeBetaAlphaTrie(ErrorModel e) {
+		betaAlphaTrie = new Trie<>();
+
+		// first create the alpha tries for each RHS
+		Map<String, Trie<Double>> alphaTries = new HashMap<>();
+
+		for (Map.Entry<Alignment, Double> a : e.getModel().entrySet()) {
+			String lhs = a.getKey().lhs;
+			String rhs = a.getKey().rhs;
+			double prob = a.getValue();
+
+			if (!alphaTries.containsKey(rhs)) {
+				alphaTries.put(rhs, new Trie<Double>());
+			}
+
+			alphaTries.get(rhs).put(StringUtils.reverse(lhs), -Math.log(prob));
+
+		}
+
+		// then create the whole beta-alpha trie
+		for (String rhs : alphaTries.keySet()) {
+			betaAlphaTrie.put(StringUtils.reverse(rhs), alphaTries.get(rhs));
+		}
+	}
+
 	/**
 	 * Read the probabilities for all candidates off the dictTrie and 
 	 * return a ranked list of Candidates.
@@ -272,5 +350,4 @@ public class SpellChecker
 		
 		return c;
 	}
-
 }

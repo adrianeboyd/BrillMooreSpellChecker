@@ -69,11 +69,11 @@ public class Trie<V> {
 		public Node getParent() {
 			return parent;
 		}
-		
+
 		public void setFinal(boolean terminated) {
 			this.terminated = terminated;
 		}
-		
+
 		public boolean isFinal() {
 			return terminated;
 		}
@@ -88,6 +88,10 @@ public class Trie<V> {
 
 		public boolean isVapid() {
 			return children.isEmpty() && (null == value);
+		}
+
+		public String toString() {
+			return "[ " + this.key + " " + this.value + " [ " + this.children + " ] ]";
 		}
 	}
 
@@ -126,6 +130,14 @@ public class Trie<V> {
 		}
 	}
 
+	public String getPathFromRootToNode(final Node node) {
+		if (node.parent != null) {
+			return getPathFromRootToNode(node.parent) + node.getKey();
+		}
+
+		return "";
+	}
+
 	public V get(final String key) {
 		return get(root, key);
 	}
@@ -140,6 +152,23 @@ public class Trie<V> {
 			return matchingChild.getValue(); // could be null
 		} else {
 			return get(matchingChild, key.substring(1));
+		}
+	}
+
+	public Node getNode(final String key) {
+		return getNode(root, key);
+	}
+
+	public Node getNode(final Node node, final String key) {
+		final String k = String.valueOf(key.charAt(0));
+		final Node matchingChild = node.findChild(k);
+
+		if (null == matchingChild) {
+			return null;
+		} else if (k.equals(key)) {
+			return matchingChild; // could be null
+		} else {
+			return getNode(matchingChild, key.substring(1));
 		}
 	}
 
