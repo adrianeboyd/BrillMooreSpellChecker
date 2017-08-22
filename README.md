@@ -1,8 +1,8 @@
 Brill and Moore Noisy Channel Spelling Correction
 =================================================
 
-This is an inefficient* Java implementation of the noisy channel spell
-checking approach presented in:
+This is a Java implementation of the noisy channel spell checking approach
+presented in:
 
 Brill and Moore (2000). [An Improved Error Model for Noisy Channel Spelling
 Correction](http://www.aclweb.org/anthology/P00-1037). In _Proceedings of the
@@ -23,11 +23,6 @@ capitalization, so it expects all possible forms of a word (inflected,
 capitalized, lowercase, mixed case, etc.) to appear in the list of potential
 corrections. The command-line wrapper includes flags to expand a provided
 dictionary with lowercase and capitalized versions of all words.
-
-*The &alpha; &rarr; &beta; alignment parameters are retrieved from a map
-rather than a trie of tries as described in the original article, so the spell
-checker is currently quite slow, especially for larger dictionaries. We hope to
-improve the efficiency in the future.
 
 Command Line Usage
 ------------------
