@@ -263,7 +263,7 @@ public class Main
 				String word = null;
 				double freq = 0;
 
-				if (lineParts.length >= 1) {
+				if (lineParts.length == 1) {
 					word = lineParts[0];
 					freq = 1.0;
 				} else if (lineParts.length == 2) {
